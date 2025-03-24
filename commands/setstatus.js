@@ -134,25 +134,27 @@ module.exports = {
           ephemeral: true,
         });
 
-        await sendLog(interaction.client, process.env.LOG_CHANNEL_ID, {
-          title: "Bot Status Updated",
-          description: `Bot status changed to **${type}** with custom status **"${message}"**`,
+        await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
+          author: {
+            name: `[SYSTEM] ${interaction.user.tag}`,
+            icon_url: interaction.user.displayAvatarURL(),
+          },
+          title: "BOT STATUS UPDATED",
+          description: [
+            "**New Status Configuration**",
+            `• Status Type: \`${type.toUpperCase()}\``,
+            `• Status Message: \`${message || "None"}\``,
+            `• Duration: \`${getReadableDuration(duration)}\``,
+            `• Environment: \`${process.env.NODE_ENV || "development"}\``,
+          ].join("\n"),
+          color: "#00FFFF",
           fields: [
+            { name: "Developer", value: `<@${interaction.user.id}>` },
             {
-              name: "Developer",
-              value: `<@${interaction.user.id}>`,
-              inline: true,
-            },
-            { name: "New Status", value: type, inline: true },
-            { name: "Message", value: message, inline: false },
-            {
-              name: "Duration",
-              value: getReadableDuration(duration),
-              inline: true,
+              name: "Timestamp",
+              value: `<t:${Math.floor(Date.now() / 1000)}:R>`,
             },
           ],
-          userId: interaction.user.id,
-          timestamp: Date.now(),
         });
       } else if (subcommand === "activity") {
         const activity = interaction.options.getString("type");
@@ -186,37 +188,49 @@ module.exports = {
           ephemeral: true,
         });
 
-        await sendLog(interaction.client, process.env.LOG_CHANNEL_ID, {
-          title: "Bot Activity Updated",
-          description: `Bot activity changed to **${activity.toLowerCase()}** with message **"${message}"**`,
+        await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
+          author: {
+            name: `[SYSTEM] ${interaction.user.tag}`,
+            icon_url: interaction.user.displayAvatarURL(),
+          },
+          title: "BOT ACTIVITY UPDATED",
+          description: [
+            "**New Activity Configuration**",
+            `• Activity Type: \`${activity}\``,
+            `• Activity Message: \`${message || "None"}\``,
+            `• Duration: \`${getReadableDuration(duration)}\``,
+            `• Environment: \`${process.env.NODE_ENV || "development"}\``,
+          ].join("\n"),
+          color: "#00FFFF",
           fields: [
+            { name: "Developer", value: `<@${interaction.user.id}>` },
             {
-              name: "Developer",
-              value: `<@${interaction.user.id}>`,
-              inline: true,
-            },
-            { name: "Activity", value: activity.toLowerCase(), inline: true },
-            { name: "Message", value: message, inline: false },
-            {
-              name: "Duration",
-              value: getReadableDuration(duration),
-              inline: true,
+              name: "Timestamp",
+              value: `<t:${Math.floor(Date.now() / 1000)}:R>`,
             },
           ],
-          userId: interaction.user.id,
-          timestamp: Date.now(),
         });
       }
     } catch (error) {
-      await sendLog(interaction.client, process.env.LOG_CHANNEL_ID, {
-        title: "Bot Settings Update Error",
-        description: `Error occurred: ${error.message}`,
-        color: 0xff0000,
-        timestamp: Date.now(),
+      console.error("[SYSTEM ERROR] Failed to update presence:", error);
+      await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
+        author: {
+          name: `[SYSTEM] ERROR`,
+          icon_url: interaction.client.user.displayAvatarURL(),
+        },
+        title: "BOT PRESENCE UPDATE FAILED",
+        description: `**Error Details:**\n\`\`\`${error.message}\`\`\``,
+        color: "#FF0000",
+        fields: [
+          { name: "Developer", value: `<@${interaction.user.id}>` },
+          {
+            name: "Timestamp",
+            value: `<t:${Math.floor(Date.now() / 1000)}:R>`,
+          },
+        ],
       });
       await interaction.reply({
-        content:
-          "❌ An error occurred while updating bot settings. Please try again.",
+        content: "❌ **System Update Failed**\nCheck console for details",
         ephemeral: true,
       });
     }
