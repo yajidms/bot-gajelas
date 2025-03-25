@@ -42,14 +42,44 @@ module.exports = {
           "❌ Failed to retrieve video from Instagram."
         );
 
+      // Cek ukuran file
+      const fileSizeLimit = 8 * 1024 * 1024; // 8MB
+      let fileSize;
+      try {
+        fileSize = await getFileSize(data.url);
+      } catch (error) {
+        console.error("Error getting file size:", error);
+        fileSize = Infinity; // Default ke ukuran besar jika gagal
+      }
+
+      if (fileSize > fileSizeLimit) {
+        // Jika file terlalu besar, kirim link
+        const modifiedUrl = data.url.replace("dl=1", "dl=0");
+        return message.reply({
+          content: `[File too large! Download link:](${modifiedUrl})`,
+          allowedMentions: { repliedUser: false },
+        });
+      }
+
+      // Jika ukuran aman, kirim sebagai attachment
       message.reply({
         content: "",
-        files: [{ attachment: data.url, name: "video.mp4" }],
+        files: [{ attachment: data.url, name: "instagram.mp4" }],
         allowedMentions: { repliedUser: false },
       });
     } catch (error) {
       console.error(error);
-      message.channel.send("❌ An error occurred while retrieving the video.");
+      // Coba kirim link jika error kemungkinan karena ukuran file
+      if (data?.url) {
+        const modifiedUrl = data.url.replace("dl=1", "dl=0");
+        message.channel.send(
+          `❌ Video too large, try downloading: ${modifiedUrl}`
+        );
+      } else {
+        message.channel.send(
+          "❌ An error occurred while retrieving the video."
+        );
+      }
     }
   },
 
@@ -100,7 +130,7 @@ module.exports = {
   },
 
   handleTwitterDownload: async (message) => {
-    const prefix = "f.twitter";
+    const prefix = "f.x";
     if (!message.content.startsWith(prefix)) return;
 
     const args = message.content.slice(prefix.length).trim().split(" ");
@@ -119,7 +149,7 @@ module.exports = {
 
     try {
       const response = await axios.get(
-        `https://api.ryzendesu.vip/api/downloader/v2/twitter?url=${url}`,
+        `https://api.ryzendesu.vip/api/downloader/twitter?url=${url}`,
         {
           headers: {
             "User-Agent":
@@ -128,20 +158,50 @@ module.exports = {
         }
       );
 
-      const data = response.data.data[0];
+      const data = response.data.media[0];
       if (!data || !data.url)
         return message.channel.send(
-          "❌ Failed to retrieve video from Twitter."
+          "❌ Failed to retrieve video from Instagram."
         );
 
+      // Cek ukuran file
+      const fileSizeLimit = 8 * 1024 * 1024; // 8MB
+      let fileSize;
+      try {
+        fileSize = await getFileSize(data.url);
+      } catch (error) {
+        console.error("Error getting file size:", error);
+        fileSize = Infinity; // Default ke ukuran besar jika gagal
+      }
+
+      if (fileSize > fileSizeLimit) {
+        // Jika file terlalu besar, kirim link
+        const modifiedUrl = data.url.replace("dl=1", "dl=0");
+        return message.reply({
+          content: `[File too large! Download link:](${modifiedUrl})`,
+          allowedMentions: { repliedUser: false },
+        });
+      }
+
+      // Jika ukuran aman, kirim sebagai attachment
       message.reply({
         content: "",
-        files: [{ attachment: data.url, name: "video.mp4" }],
+        files: [{ attachment: data.url, name: "x.mp4" }],
         allowedMentions: { repliedUser: false },
       });
     } catch (error) {
       console.error(error);
-      message.channel.send("❌ An error occurred while retrieving the video.");
+      // Coba kirim link jika error kemungkinan karena ukuran file
+      if (data?.url) {
+        const modifiedUrl = data.url.replace("dl=1", "dl=0");
+        message.channel.send(
+          `❌ Video too large, try downloading: ${modifiedUrl}`
+        );
+      } else {
+        message.channel.send(
+          "❌ An error occurred while retrieving the video."
+        );
+      }
     }
   },
 
@@ -189,3 +249,29 @@ module.exports = {
     }
   },
 };
+
+async function getFileSize(url) {
+  try {
+    // Coba metode HEAD terlebih dahulu (lebih cepat)
+    const response = await axios.head(url, { maxRedirects: 5 });
+    const contentLength = response.headers["content-length"];
+
+    if (contentLength) {
+      return parseInt(contentLength, 10);
+    } else {
+      console.warn("Warning: No Content-Length header found. Trying GET request...");
+    }
+  } catch (error) {
+    console.error("HEAD request failed:", error.message);
+  }
+
+  // Jika HEAD gagal atau tidak ada Content-Length, coba GET
+  try {
+    const response = await axios.get(url, { method: "GET", responseType: "stream", maxRedirects: 5 });
+    return parseInt(response.headers["content-length"], 10) || Infinity;
+  } catch (error) {
+    console.error("GET request failed:", error.message);
+    return Infinity; // Default ke ukuran besar jika gagal
+  }
+}
+

@@ -1,8 +1,9 @@
-require('dotenv').config();
+require('dotenv').config(); 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { loadCommands } = require('./handlers/commandLoader');
 const { loadEvents } = require('./handlers/eventLoader');
-const { registerCommands } = require('./registerCommands');  // Impor registerCommands
+const { registerCommands } = require('./registerCommands');
+const { handleIgDownload, handleFbDownload, handleTwitterDownload, handleTiktokDownload } = require('./handlers/downloaderHandler');
 
 const client = new Client({ 
     intents: [
@@ -18,7 +19,15 @@ client.commands = new Collection();
 loadEvents(client);
 loadCommands(client);
 
+client.on('messageCreate', async (message) => {
+    if (message.author.bot) return;
+    handleIgDownload(message);
+    handleFbDownload(message);
+    handleTwitterDownload(message);
+    handleTiktokDownload(message);
+});
+
+
 client.login(process.env.DISCORD_TOKEN).then(() => {
-    // Daftarkan slash commands setelah bot login
     registerCommands(client);
 });
