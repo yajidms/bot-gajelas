@@ -1,18 +1,34 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Tambahkan EmbedBuilder
 
-// Ambil ID developer dari environment variable
 const DEVELOPER_IDS = process.env.DEV_ID 
   ? process.env.DEV_ID.split(',').map(id => id.trim())
   : [];
 
+// Tambahkan fungsi sendLog
+const sendLog = async (client, channelId, embedData) => {
+  try {
+    const channel = await client.channels.fetch(channelId);
+    const embed = new EmbedBuilder()
+      .setColor(embedData.color || '#0099ff')
+      .setTitle(embedData.title)
+      .setDescription(embedData.description)
+      .setAuthor(embedData.author)
+      .addFields(embedData.fields)
+      .setTimestamp();
+    
+    await channel.send({ embeds: [embed] });
+  } catch (error) {
+    console.error('Error sending log:', error);
+  }
+};
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('restart')
-    .setDescription('[Developer Only] Restart bot system') // Deskripsi khusus developer
-    .setDMPermission(false), // Nonaktifkan akses di DM
+    .setDescription('[Developer Only] Restart bot system')
+    .setDMPermission(false),
 
   async execute(interaction) {
-    // 1. Cek akses developer
     if (!DEVELOPER_IDS.includes(interaction.user.id)) {
       return interaction.reply({
         content: '🚫 **System Restricted**\nThis command requires elevated privileges',
@@ -21,22 +37,15 @@ module.exports = {
     }
 
     try {
-      // 2. Kirim konfirmasi restart
       await interaction.reply({
         content: '🔄 **System Rebooting**\nBot akan restart dalam 3 detik...',
         ephemeral: true
       });
 
-      // 3. Logging sebelum exit
       console.log(`[SYSTEM] Initiated restart by: ${interaction.user.tag}`);
       console.log('=== SHUTTING DOWN ===');
 
-      // 4. Delay 3 detik sebelum exit
-      setTimeout(() => {
-        process.exit(0);
-      }, 3000);
-
-      // 5. Kirim log ke channel developer
+      // Pindahkan sendLog SEBELUM setTimeout
       await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
         author: {
           name: `[SYSTEM] ${interaction.user.tag}`,
@@ -53,6 +62,10 @@ module.exports = {
           { name: "Timestamp", value: `<t:${Math.floor(Date.now()/1000)}:R>` }
         ]
       });
+
+      setTimeout(() => {
+        process.exit(0);
+      }, 3000);
 
     } catch (error) {
       console.error('[SYSTEM ERROR] Restart failure:', error);
