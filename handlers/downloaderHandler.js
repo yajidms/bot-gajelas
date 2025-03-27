@@ -43,7 +43,7 @@ module.exports = {
         );
 
       // Cek ukuran file
-      const fileSizeLimit = 8 * 1024 * 1024; // 8MB
+      const fileSizeLimit = 10 * 1024 * 1024; // 8MB
       let fileSize;
       try {
         fileSize = await getFileSize(data.url);
@@ -165,7 +165,7 @@ module.exports = {
         );
 
       // Cek ukuran file
-      const fileSizeLimit = 8 * 1024 * 1024; // 8MB
+      const fileSizeLimit = 10 * 1024 * 1024; // 8MB
       let fileSize;
       try {
         fileSize = await getFileSize(data.url);
@@ -259,7 +259,9 @@ async function getFileSize(url) {
     if (contentLength) {
       return parseInt(contentLength, 10);
     } else {
-      console.warn("Warning: No Content-Length header found. Trying GET request...");
+      console.warn(
+        "Warning: No Content-Length header found. Trying GET request..."
+      );
     }
   } catch (error) {
     console.error("HEAD request failed:", error.message);
@@ -267,11 +269,14 @@ async function getFileSize(url) {
 
   // Jika HEAD gagal atau tidak ada Content-Length, coba GET
   try {
-    const response = await axios.get(url, { method: "GET", responseType: "stream", maxRedirects: 5 });
+    const response = await axios.get(url, {
+      method: "GET",
+      responseType: "stream",
+      maxRedirects: 5,
+    });
     return parseInt(response.headers["content-length"], 10) || Infinity;
   } catch (error) {
     console.error("GET request failed:", error.message);
     return Infinity; // Default ke ukuran besar jika gagal
   }
 }
-
