@@ -1,179 +1,111 @@
-const { AttachmentBuilder } = require("discord.js");
-const axios = require("axios");
+const { AttachmentBuilder } = require('discord.js');
+const axios = require('axios');
 
-// ===================== CONFIGURATION =====================
-const fileSizeLimit = 8 * 1024 * 1024; // 8MB
+// ===================== KONFIGURASI =====================
+const FILE_SIZE_LIMIT = 8 * 1024 * 1024;
+const PLATFORM_CONFIG = {
+  x: {
+    endpoint: 'twitter',
+    fileName: 'twitter.mp4',
+    dataPath: 'media[0]',
+    prefix: 'f.x'
+  },
+  ig: {
+    endpoint: 'igdl',
+    fileName: 'instagram.mp4',
+    dataPath: 'data[0]',
+    prefix: 'f.ig'
+  },
+  fb: {
+    endpoint: 'fbdl',
+    fileName: 'facebook.mp4',
+    dataPath: 'data[0]',
+    prefix: 'f.fb'
+  }
+};
 
-// ===================== MAIN FUNCTIONS =====================
+// ===================== UTILITIES =====================
 const validateUrl = (url) => /^https?:\/\/\S+/.test(url);
 
 const getFileSize = async (url) => {
   try {
     const response = await axios.head(url, { maxRedirects: 5 });
-    return parseInt(response.headers["content-length"], 10);
-  } catch (error) {
-    console.error("Failed to get file size:", error);
+    return parseInt(response.headers['content-length'], 10) || Infinity;
+  } catch {
     return Infinity;
   }
 };
 
-// ===================== HANDLERS =====================
+const extractMediaData = (response, dataPath) => {
+  const [mainKey, arrayIndex] = dataPath.split(/[\[\]]/g).filter(Boolean);
+  return response.data[mainKey][arrayIndex];
+};
+
+// ===================== CORE HANDLER =====================
+const handleMediaDownload = async (message, platform) => {
+  const config = PLATFORM_CONFIG[platform];
+  const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+  const [url, ...messageParts] = args;
+  const messageContent = messageParts.join(' ');
+
+  try {
+    if (!validateUrl(url)) {
+      const warning = await message.channel.send('⚠️ URL tidak valid!');
+      setTimeout(() => warning.delete().catch(() => {}), 3000);
+      return;
+    }
+
+    await message.delete().catch(() => {});
+
+    const apiUrl = `https://api.ryzendesu.vip/api/downloader/${config.endpoint}?url=${encodeURIComponent(url)}`;
+    const response = await axios.get(apiUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+      }
+    });
+
+    const mediaData = extractMediaData(response, config.dataPath);
+    if (!mediaData?.url) throw new Error('Media tidak ditemukan');
+
+    const fileSize = await getFileSize(mediaData.url);
+    const modifiedUrl = mediaData.url.replace("dl=1", "dl=0");
+    
+    // Bagian yang diubah
+    const userMention = `<@${message.author.id}>`;
+    const content = [
+      messageContent,
+      `${userMention}`,
+      fileSize > FILE_SIZE_LIMIT ? `[᲼](${modifiedUrl})` : ''
+    ].filter(Boolean).join('\n');
+
+    if (fileSize <= FILE_SIZE_LIMIT) {
+      const attachment = new AttachmentBuilder(mediaData.url, { 
+        name: config.fileName 
+      });
+      await message.channel.send({
+        content: content,
+        files: [attachment],
+        allowedMentions: { parse: [] }
+      });
+    } else {
+      await message.channel.send({
+        content: content,
+        allowedMentions: { parse: [] }
+      });
+    }
+
+  } catch (error) {
+    console.error(`[${platform.toUpperCase()}_ERROR]`, error);
+    const errorMessage = await message.channel.send(
+      `❌ Gagal mengunduh ${platform.toUpperCase()} video!`
+    );
+    setTimeout(() => errorMessage.delete().catch(() => {}), 5000);
+  }
+};
+
+// ===================== EXPORTS =====================
 module.exports = {
-  handleTwitterDownload: async (message) => {
-    const prefix = "f.x";
-    if (!message.content.startsWith(prefix)) return;
-
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const url = args[0];
-    const messageContent = args.slice(1).join(" ");
-
-    try {
-      await message
-        .delete()
-        .catch((e) => console.error("Failed to delete message:", e));
-
-      if (!validateUrl(url)) {
-        return message.channel
-          .send("⚠️ Invalid URL!")
-          .then((msg) => setTimeout(() => msg.delete().catch((e) => {}), 3000));
-      }
-
-      const response = await axios.get(
-        `https://api.ryzendesu.vip/api/downloader/twitter?url=${url}`,
-        {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-          },
-        }
-      );
-
-      const mediaData = response.data.media[0];
-      if (!mediaData?.url) throw new Error("Media URL not found");
-
-      const fileSize = await getFileSize(mediaData.url);
-      const modifiedUrl = mediaData.url.replace("dl=1", "dl=0");
-
-      const attachment = new AttachmentBuilder(mediaData.url, {
-        name: "twitter.mp4",
-      });
-
-      const msgContent = `${messageContent || ""}\n${message.author}${
-        fileSize > fileSizeLimit ? `\n[᲼](${modifiedUrl})` : ""
-      }`;
-
-      return message.channel.send({
-        content: msgContent,
-        files: fileSize > fileSizeLimit ? [] : [attachment],
-        allowedMentions: { parse: [] },
-      });
-    } catch (error) {
-      console.error("Twitter Downloader Error:", error);
-      message.channel
-        .send("❌ Failed to download Twitter video!")
-        .catch((e) => console.error("Failed to send error:", e));
-    }
-  },
-
-  handleIgDownload: async (message) => {
-    const prefix = "f.ig";
-    if (!message.content.startsWith(prefix)) return;
-
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const url = args[0];
-
-    try {
-      await message.delete().catch(console.error);
-
-      if (!validateUrl(url)) {
-        return message.channel
-          .send("⚠️ Invalid URL!")
-          .then((msg) => setTimeout(() => msg.delete(), 3000));
-      }
-
-      const response = await axios.get(
-        `https://api.ryzendesu.vip/api/downloader/igdl?url=${url}`,
-        {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-          },
-        }
-      );
-
-      const mediaData = response.data.data[0];
-      const fileSize = await getFileSize(mediaData.url);
-
-      if (fileSize > fileSizeLimit) {
-        const modifiedUrl = mediaData.url.replace("dl=1", "dl=0");
-        return message.channel.send({
-          content: `${message.author} [᲼](${modifiedUrl})`,
-          allowedMentions: { parse: [] },
-        });
-      }
-
-      const attachment = new AttachmentBuilder(mediaData.url, {
-        name: "instagram.mp4",
-      });
-      message.channel.send({
-        content: `${message.author}`,
-        files: [attachment],
-        allowedMentions: { parse: [] },
-      });
-    } catch (error) {
-      console.error("Instagram Downloader Error:", error);
-      message.channel.send("❌ Failed to download Instagram video!");
-    }
-  },
-
-  handleFbDownload: async (message) => {
-    const prefix = "f.fb";
-    if (!message.content.startsWith(prefix)) return;
-
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const url = args[0];
-
-    try {
-      await message.delete().catch(console.error);
-
-      if (!validateUrl(url)) {
-        return message.channel
-          .send("⚠️ Invalid URL!")
-          .then((msg) => setTimeout(() => msg.delete(), 3000));
-      }
-
-      const response = await axios.get(
-        `https://api.ryzendesu.vip/api/downloader/fbdl?url=${url}`,
-        {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-          },
-        }
-      );
-
-      const mediaData = response.data.data[0];
-      const fileSize = await getFileSize(mediaData.url);
-
-      if (fileSize > fileSizeLimit) {
-        const modifiedUrl = mediaData.url.replace("dl=1", "dl=0");
-        return message.channel.send({
-          content: `${message.author} [᲼](${modifiedUrl})`,
-          allowedMentions: { parse: [] },
-        });
-      }
-
-      const attachment = new AttachmentBuilder(mediaData.url, {
-        name: "facebook.mp4",
-      });
-      message.channel.send({
-        content: `${message.author}`,
-        files: [attachment],
-        allowedMentions: { parse: [] },
-      });
-    } catch (error) {
-      console.error("Facebook Downloader Error:", error);
-      message.channel.send("❌ Failed to download Facebook video!");
-    }
-  },
+  handleX: (message) => handleMediaDownload(message, 'x'),
+  handleIg: (message) => handleMediaDownload(message, 'ig'),
+  handleFb: (message) => handleMediaDownload(message, 'fb')
 };
