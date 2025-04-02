@@ -9,64 +9,145 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("banner")
-    .setDescription("View user profile banner") // Lihat banner profil pengguna
-    .addUserOption(
-      (option) =>
-        option
-          .setName("user")
-          .setDescription("Select a user")
-          .setRequired(false) // Pilih pengguna
+    .setDescription("View user profile banner")
+    .addUserOption((option) =>
+      option.setName("user").setDescription("Select a user").setRequired(false)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("type")
+        .setDescription("Choose banner type")
+        .addChoices(
+          { name: "Global", value: "global" },
+          { name: "Server", value: "server" }
+        )
+        .setRequired(false)
     ),
 
   async execute(interaction) {
     try {
-      // 1. Get target user
       const targetUser =
-        interaction.options.getUser("user") || interaction.user; // 2. Fetch full user data (including banner)
+        interaction.options.getUser("user") || interaction.user;
+      const bannerType = interaction.options.getString("type");
+      const member =
+        interaction.options.getMember("user") || interaction.member;
 
+      // Fetch full user data
       const fullUser = await interaction.client.users.fetch(targetUser.id, {
         force: true,
-      }); // 3. Check if user has a banner
-
-      const bannerURL = fullUser.bannerURL({
-        dynamic: true,
-        size: 4096,
       });
 
-      if (!bannerURL) {
+      // Fungsi untuk mendapatkan banner dan memeriksa apakah GIF
+      const getBannerInfo = (user, isServer = false) => {
+        if (isServer && !interaction.guild)
+          return { url: null, isAnimated: false }; // Tambahkan ini
+
+        const bannerHash = isServer ? member?.banner : user.banner;
+        if (!bannerHash) return { url: null, isAnimated: false };
+
+        const isAnimated = bannerHash.startsWith("a_");
+        let bannerURL;
+
+        if (isServer) {
+          const serverBannerExtension = isAnimated ? "gif" : "png";
+          const serverBannerID = member.banner;
+          bannerURL = `https://cdn.discordapp.com/guilds/${interaction.guild.id}/users/${member.id}/banners/${serverBannerID}.${serverBannerExtension}?size=4096`;
+        } else {
+          const globalBannerExtension = isAnimated ? "gif" : "png";
+          bannerURL = `https://cdn.discordapp.com/banners/${user.id}/${bannerHash}.${globalBannerExtension}?size=4096`;
+        }
+
+        return { url: bannerURL, isAnimated };
+      };
+
+      // Dapatkan informasi banner
+      const globalBannerInfo = getBannerInfo(fullUser);
+      const serverBannerInfo = member ? getBannerInfo(fullUser, true) : null;
+
+      // Siapkan embed dan tombol
+      const embeds = [];
+      const buttons = [];
+
+      // Handle tipe banner
+      const handleBanner = (type, bannerInfo) => {
+        if (!bannerInfo || !bannerInfo.url) return;
+
+        embeds.push(
+          createBannerEmbed(
+            fullUser,
+            type,
+            bannerInfo.url,
+            bannerInfo.isAnimated
+          )
+        );
+        buttons.push(
+          createBannerButton(
+            `${type} Banner`,
+            bannerInfo.url,
+            bannerInfo.isAnimated
+          )
+        );
+      };
+
+      if (bannerType === "server") {
+        if (!serverBannerInfo || !serverBannerInfo.url) {
+          return interaction.reply({
+            content: "❌ User doesn't have a server banner!",
+            ephemeral: true,
+          });
+        }
+        handleBanner("Server", serverBannerInfo);
+      } else if (bannerType === "global") {
+        if (!globalBannerInfo || !globalBannerInfo.url) {
+          return interaction.reply({
+            content: "❌ User doesn't have a global banner!",
+            ephemeral: true,
+          });
+        }
+        handleBanner("Global", globalBannerInfo);
+      } else {
+        // Jika tidak ada tipe yang dipilih, tampilkan keduanya
+        handleBanner("Global", globalBannerInfo);
+        handleBanner("Server", serverBannerInfo);
+      }
+
+      // Error handling jika tidak ada banner
+      if (embeds.length === 0) {
         return interaction.reply({
-          content: `**${fullUser.tag}** does not have a profile banner ${
-            // **${fullUser.tag}** tidak memiliki banner profil
-            fullUser.accentColor ? "(although they have an accent color)" : "" // "(walau memiliki warna aksen)"
-          }`,
+          content: "❌ User doesn't have any banners!",
           ephemeral: true,
         });
-      } // 4. Create embed with banner
+      }
 
-      const bannerEmbed = new EmbedBuilder()
-        .setColor(fullUser.accentColor || "#5865F2")
-        .setTitle(`Banner of ${fullUser.tag}`) // Banner ${fullUser.tag}
-        .setImage(bannerURL)
-        .setFooter({ text: "Banner is available for Nitro users only" }); // Banner hanya tersedia untuk pengguna Nitro // 5. Create button to open in browser
-
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setLabel("Open in Browser") // Buka di Browser
-          .setStyle(ButtonStyle.Link)
-          .setURL(bannerURL)
-      ); // 6. Send result
+      const actionRow = new ActionRowBuilder().addComponents(buttons);
 
       await interaction.reply({
-        embeds: [bannerEmbed],
-        components: [row],
+        embeds: embeds,
+        components: buttons.length > 0 ? [actionRow] : [],
       });
     } catch (error) {
       console.error("Banner command error:", error);
       await interaction.reply({
-        content:
-          'Failed to fetch banner data. Make sure the bot has the "User Info Access" permission!', // Gagal mengambil data banner. Pastikan bot memiliki permission "Akses Informasi Pengguna"!
+        content: "Failed to fetch banner data. Please check bot permissions!",
         ephemeral: true,
       });
     }
   },
 };
+
+function createBannerEmbed(user, type, url, isAnimated) {
+  return new EmbedBuilder()
+    .setColor(user.accentColor || "#5865F2")
+    .setTitle(`${user.tag} - ${type} Banner`)
+    .setImage(url)
+    .setFooter({
+      text: isAnimated ? "🎬 Animated Banner" : "🖼 Static Banner",
+    });
+}
+
+function createBannerButton(label, url, isAnimated) {
+  return new ButtonBuilder()
+    .setLabel(`${label} ${isAnimated ? "🎬" : "🖼"}`)
+    .setStyle(ButtonStyle.Link)
+    .setURL(url);
+}
