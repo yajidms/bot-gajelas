@@ -20,9 +20,9 @@ module.exports = {
 
     const infoEmbed = new EmbedBuilder()
       .setColor(0x00ffed)
-      .setTitle("Ellen Bot Information") // Informasi Ellen Bot
+      .setTitle("... Bot Information") // Informasi Ellen Bot
       .setDescription(
-        "✨ **Ellen Bot** is a versatile assistant designed to maintain A Server. This bot can detect links from Instagram, TikTok, X (Twitter), Reddit, and Ifunny, then transform them into automatic embeds. Other features include **AI assistance** for information retrieval without going through a browser."
+        "✨ **... Bot** is a versatile assistant designed to maintain A Server. This bot can detect links from Instagram, TikTok, X (Twitter), Reddit, and Ifunny, then transform them into automatic embeds. Other features include **AI assistance** for information retrieval without going through a browser."
       ) // ✨ **Ellen Bot** adalah asisten serbaguna yang dirancang untuk menjaga Suatu Server. Bot ini mampu mendeteksi tautan Instagram, TikTok, X (Twitter), Reddit, dan Ifunny, lalu merubahnya menjadi embed otomatis. Fitur lainnya meliputi **bantuan AI** untuk keperluan dalam mencari informasi tanpa melewati browser.
       .setThumbnail(botAvatar)
       .setFooter({ text: "Made with ❤️ by n3wbi3" })

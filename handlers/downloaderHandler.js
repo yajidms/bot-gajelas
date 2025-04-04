@@ -21,6 +21,12 @@ const PLATFORM_CONFIG = {
     fileName: 'facebook.mp4',
     dataPath: 'data[0]',
     prefix: 'f.fb'
+  },
+  tt: {
+    endpoint: 'ttdl',
+    fileName: 'tiktok.mp4',
+    dataPath: 'data[0]',
+    prefix: 'f.tt'
   }
 };
 
@@ -107,5 +113,6 @@ const handleMediaDownload = async (message, platform) => {
 module.exports = {
   handleX: (message) => handleMediaDownload(message, 'x'),
   handleIg: (message) => handleMediaDownload(message, 'ig'),
-  handleFb: (message) => handleMediaDownload(message, 'fb')
+  handleFb: (message) => handleMediaDownload(message, 'fb'),
+  handleTt: (message) => handleMediaDownload(message, 'tt')
 };
