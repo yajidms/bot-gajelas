@@ -11,11 +11,17 @@ const PLATFORM_CONFIG = {
     prefix: "f.ig",
   },
   fb: {
-    endpoint: 'fbdl',
-    fileName: 'facebook.mp4',
-    dataPath: 'data[0]',
-    prefix: 'f.fb'
-  }
+    endpoint: "fbdl",
+    fileName: "facebook.mp4",
+    dataPath: "data[0]",
+    prefix: "f.fb",
+  },
+  tt: {
+    endpoint: "ttdl",
+    fileName: "tiktok.mp4",
+    dataPath: "data[0]",
+    prefix: "f.tt",
+  },
 };
 
 // ===================== UTILITIES =====================
@@ -103,7 +109,7 @@ const handleMediaDownload = async (message, platform) => {
 
 // ===================== EXPORTS =====================
 module.exports = {
-  handleX: (message) => handleMediaDownload(message, 'x'),
-  handleIg: (message) => handleMediaDownload(message, 'ig'),
-  handleFb: (message) => handleMediaDownload(message, 'fb')
+  handleIg: (message) => handleMediaDownload(message, "ig"),
+  handleFb: (message) => handleMediaDownload(message, "fb"),
+  handleTt: (message) => handleMediaDownload(message, "tt"),
 };
