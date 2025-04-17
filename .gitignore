@@ -1,5 +1,4 @@
 .env
 node_modules
 *.txt
-backupdownloader.txt
-luarkonteks.js
+.gitignore
