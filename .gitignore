@@ -1,5 +1,5 @@
 .env
 node_modules
-toggleai.txt
+*.txt
 backupdownloader.txt
 luarkonteks.js
