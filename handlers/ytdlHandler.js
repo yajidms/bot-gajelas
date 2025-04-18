@@ -58,10 +58,17 @@ async function handleYtDownload(message) {
     }
 
     if (!canSendAttachment) {
-      // File terlalu besar atau tidak diketahui ukurannya, kirim link download saja
+      // File terlalu besar atau tidak diketahui ukurannya, kirim link download + thumbnail
+      let files = [];
+      if (data.thumbnail) {
+        files.push(
+          new AttachmentBuilder(data.thumbnail, { name: "thumbnail.jpg" })
+        );
+      }
       await message.channel.send({
         content: `${text}\n\n[Download Video](${data.url})`,
-        allowedMentions: { users: [] }
+        files,
+        allowedMentions: { users: [] },
       });
     } else {
       // File cukup kecil, kirim sebagai attachment
@@ -71,7 +78,7 @@ async function handleYtDownload(message) {
       await message.channel.send({
         content: text,
         files: [attachment],
-        allowedMentions: { users: [] }
+        allowedMentions: { users: [] },
       });
     }
   } catch (e) {
