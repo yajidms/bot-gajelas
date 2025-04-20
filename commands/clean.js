@@ -1,10 +1,14 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  MessageFlags,
+} = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("clean-message")
     .setDescription("Delete a certain number of messages")
-    .addIntegerOption(option =>
+    .addIntegerOption((option) =>
       option
         .setName("amount")
         .setDescription("Number of messages to delete (1-1000)")
@@ -16,30 +20,45 @@ module.exports = {
     .setDMPermission(false),
 
   async execute(interaction) {
-    // 1. Double-check permissions (optional extra layer)
-    if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+    if (
+      !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
+    ) {
       return interaction.reply({
         content: "❌ Sorry, only server administrators can use this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
     const amount = interaction.options.getInteger("amount");
+    let totalDeleted = 0;
+    let remaining = amount;
 
     try {
-      // 2. Delete messages
-      const deletedMessages = await interaction.channel.bulkDelete(amount, true);
-      
-      // 3. Send confirmation
-      await interaction.reply({
-        content: `🧹 Successfully deleted ${deletedMessages.size} messages.`,
-        ephemeral: true,
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+      while (remaining > 0) {
+        const deleteCount = Math.min(remaining, 100);
+        const deletedMessages = await interaction.channel.bulkDelete(
+          deleteCount,
+          true
+        );
+        const deletedSize = deletedMessages.size;
+        totalDeleted += deletedSize;
+        remaining -= deletedSize;
+        if (deletedSize === 0) break;
+      }
+
+      await interaction.editReply({
+        content:
+          `🧹 Successfully deleted ${totalDeleted} messages.` +
+          (totalDeleted < amount
+            ? "\n⚠️ Some messages may be older than 14 days and could not be deleted."
+            : ""),
       });
     } catch (error) {
-      console.error("Error cleaning messages:", error);
-      await interaction.reply({
-        content: "Failed to delete messages. Messages older than 14 days or missing permissions.",
-        ephemeral: true,
+      console.error(error);
+      await interaction.editReply({
+        content: "❌ An error occurred while deleting messages.",
       });
     }
   },
