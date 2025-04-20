@@ -45,7 +45,7 @@ async function handleX(msg) {
       console.log(data);
 
       try {
-        let fileSizeLimit = 8 * 1024 * 1024; // Discord membatasi unggahan file max 8MB
+        let fileSizeLimit = 100 * 1024 * 1024; // Discord membatasi unggahan file max 8MB
         let fileSize = await getFileSize(data.url);
 
         if (fileSize > fileSizeLimit) {
