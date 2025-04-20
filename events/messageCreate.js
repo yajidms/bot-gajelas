@@ -1,16 +1,20 @@
-const { handleEmbed } = require('../handlers/embedHandler'); // pastikan handler embed ada
-const { handleAiChat } = require('../handlers/aiHandler'); // pastikan handler AI ada
+const { handleEmbed } = require("../handlers/embedHandler");
+const { handleAiChat } = require("../handlers/aiHandler");
+
+const ALLOWED_GUILD_IDS = process.env.GUILD_ID
+  ? process.env.GUILD_ID.split(",").map((id) => id.trim())
+  : [];
 
 module.exports = {
-    name: 'messageCreate',
-    async execute(client, message) {
-        // Jangan proses pesan yang dikirim oleh bot
-        if (message.author.bot) return;
+  name: "messageCreate",
+  async execute(client, message) {
+    // Jangan proses pesan yang dikirim oleh bot
+    if (message.author.bot) return;
 
-        // Memproses pesan untuk embed (tautan)
-        await handleEmbed(message, client);
+    // Batasi hanya untuk server tertentu
+    if (!message.guild || !ALLOWED_GUILD_IDS.includes(message.guild.id)) return;
 
-        // Memproses pesan untuk fitur AI (hanya di channel tertentu jika AI aktif)
-        await handleAiChat(message);
-    },
+    await handleEmbed(message, client);
+    await handleAiChat(message);
+  },
 };

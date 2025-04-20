@@ -1,10 +1,21 @@
 const { EmbedBuilder } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
+const ALLOWED_GUILD_IDS = process.env.GUILD_ID
+  ? process.env.GUILD_ID.split(",").map((id) => id.trim())
+  : [];
+
 module.exports = {
   name: "messageDelete",
   once: false,
   async execute(client, deletedMessage) {
+    // Batasi hanya untuk server tertentu
+    if (
+      !deletedMessage.guild ||
+      !ALLOWED_GUILD_IDS.includes(deletedMessage.guild.id)
+    )
+      return;
+
     // Ensure message is valid and not from a bot
     if (!deletedMessage || !deletedMessage.author || deletedMessage.author.bot)
       return;

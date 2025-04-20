@@ -1,10 +1,18 @@
 const { EmbedBuilder } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
+const ALLOWED_GUILD_IDS = process.env.GUILD_ID
+  ? process.env.GUILD_ID.split(",").map((id) => id.trim())
+  : [];
+
 module.exports = {
   name: "messageUpdate",
   once: false,
   async execute(client, oldMessage, newMessage) {
+    // Batasi hanya untuk server tertentu
+    if (!oldMessage.guild || !ALLOWED_GUILD_IDS.includes(oldMessage.guild.id))
+      return;
+
     // Pastikan pesan bukan dari bot dan konten pesan berubah
     if (
       !oldMessage.author ||
@@ -12,7 +20,6 @@ module.exports = {
       oldMessage.content === newMessage.content
     )
       return;
-
     const logChannelId = process.env.LOG_CHANNEL_ID; // Ambil ID channel log
 
     // Membuat embed untuk pesan yang diedit
