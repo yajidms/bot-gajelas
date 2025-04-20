@@ -41,6 +41,13 @@ const extractMediaData = (response, dataPath) => {
   return response.data[mainKey][arrayIndex];
 };
 
+// ===================== USAGE TUTORIAL =====================
+const USAGE_TUTORIAL = {
+  ig: "Masukkan URL Reel Instagram yang valid!\nContoh: `f.ig https://instagram.com/...`",
+  fb: "Masukkan URL Video Facebook yang valid!\nContoh: `f.fb https://facebook.com/...`",
+  tt: "Masukkan URL Video TikTok yang valid!\nContoh: `f.tt https://tiktok.com/...`",
+};
+
 // ===================== CORE HANDLER =====================
 const handleMediaDownload = async (message, platform) => {
   const config = PLATFORM_CONFIG[platform];
@@ -48,13 +55,12 @@ const handleMediaDownload = async (message, platform) => {
   const [url, ...messageParts] = args;
   const messageContent = messageParts.join(" ");
 
-  try {
-    if (!validateUrl(url)) {
-      const warning = await message.channel.send("⚠️ URL tidak valid!");
-      setTimeout(() => warning.delete().catch(() => {}), 3000);
-      return;
-    }
+  // Tampilkan tutor hanya untuk prefix yang dipakai
+  if (!validateUrl(url)) {
+    return message.reply(USAGE_TUTORIAL[platform]);
+  }
 
+  try {
     await message.delete().catch(() => {});
 
     const apiUrl = `https://api.ryzendesu.vip/api/downloader/${
@@ -73,7 +79,6 @@ const handleMediaDownload = async (message, platform) => {
     const fileSize = await getFileSize(mediaData.url);
     const modifiedUrl = mediaData.url.replace("dl=1", "dl=0");
 
-    // Bagian yang diubah
     const userMention = `<@${message.author.id}>`;
     const content = [
       messageContent,
