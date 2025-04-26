@@ -98,7 +98,7 @@ async function handleLlamaResponse(message, prefix) {
   const userQuestion = message.content.slice(prefix.length).trim();
   if (!userQuestion) {
     return message.reply({
-      content: "Please write down the issue you want to ask after `f.llama4`.",
+      content: "Please write down the issue you want to ask after `f.llama`.",
       allowedMentions: { repliedUser: false },
     });
   }
