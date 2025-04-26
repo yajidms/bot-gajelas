@@ -2,6 +2,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
     "axios": "^1.8.4",
+    "deepinfra": "^2.0.2",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
     "moment-timezone": "^0.5.47",

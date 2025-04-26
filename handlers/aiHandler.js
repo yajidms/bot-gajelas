@@ -6,13 +6,25 @@ const { sendLog } = require("./logHandler");
 let aiStatus = true;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-const llamaApiKey = process.env.LLAMA_API_KEY;
+const togetherApiKey = process.env.TOGETHER_API_KEY;
 const llamaModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
+const deepseekModel = "deepseek-ai/DeepSeek-R1";
+
+// Fungsi format <think> jadi -# blockquote
+function formatThinkBlockquote(text) {
+  return text.replace(/<think>([\s\S]*?)<\/think>/g, (match, content) => {
+    return content
+      .split("\n")
+      .map((line) => (line.trim() ? `-# ${line}` : ""))
+      .join("\n");
+  });
+}
 
 module.exports = {
   handleAiChat: async (message) => {
     const geminiPrefix = "f.gemini";
     const llamaPrefix = "f.llama";
+    const deepthinkPrefix = "f.deepseek-r1";
 
     if (
       !aiStatus &&
@@ -31,20 +43,27 @@ module.exports = {
         .setTitle("How to Use AI Chat")
         .setDescription(
           "**Use the following command to ask the AI:**\n\n" +
-          "**Gemini AI:**\n" +
-          "`f.gemini [your question]`\n" +
-          "**Llama AI:**\n" +
-          "`f.llama [your question]`\n" +
-          "_Make sure the prefix is followed by a space and then your question!_"
+            "**Gemini AI:**\n" +
+            "`f.gemini [your question]`\n" +
+            "**Llama AI:**\n" +
+            "`f.llama [your question]`\n" +
+            "**DeepSeek R1:**\n" +
+            "`f.deepseek-r1 [your question]`\n" +
+            "_Make sure the prefix is followed by a space and then your question!_"
         )
         .setColor(0x5865f2);
-      return message.reply({ embeds: [tutorialEmbed], allowedMentions: { repliedUser: false } });
+      return message.reply({
+        embeds: [tutorialEmbed],
+        allowedMentions: { repliedUser: false },
+      });
     }
 
     if (message.content.startsWith(geminiPrefix)) {
       await handleGeminiResponse(message, geminiPrefix);
     } else if (message.content.startsWith(llamaPrefix)) {
       await handleLlamaResponse(message, llamaPrefix);
+    } else if (message.content.startsWith(deepthinkPrefix)) {
+      await handleDeepSeekResponse(message, deepthinkPrefix);
     }
   },
 
@@ -117,7 +136,7 @@ async function handleLlamaResponse(message, prefix) {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${llamaApiKey}`,
+          Authorization: `Bearer ${togetherApiKey}`,
         },
       }
     );
@@ -147,6 +166,64 @@ async function handleLlamaResponse(message, prefix) {
     });
   } catch (error) {
     await handleError(message, "Llama 4", error, userQuestion);
+  }
+}
+
+async function handleDeepSeekResponse(message, prefix) {
+  const userQuestion = message.content.slice(prefix.length).trim();
+  if (!userQuestion) {
+    return message.reply({
+      content:
+        "Please write down the issue you want to ask after `f.deepseek-r1`.",
+      allowedMentions: { repliedUser: false },
+    });
+  }
+
+  try {
+    const payload = {
+      model: deepseekModel,
+      messages: [{ role: "user", content: userQuestion }],
+      stream: false,
+    };
+
+    const response = await axios.post(
+      "https://api.together.ai/v1/chat/completions",
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${togetherApiKey}`,
+        },
+      }
+    );
+
+    let answer = response.data.choices[0].message.content;
+    answer = formatThinkBlockquote(answer);
+
+    const partsSent = await sendResponse(
+      message,
+      answer,
+      "DeepSeek R1",
+      "blob:https://imgur.com/910354e1-c151-408a-b4d8-4f8b5530a2ec"
+    );
+
+    // Logging success
+    await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
+      userId: message.author.id,
+      messageId: message.id,
+      author: {
+        name: message.author.tag,
+        icon_url: message.author.displayAvatarURL(),
+      },
+      title: "DeepSeek R1 Request Processed",
+      description: `**Question:** ${userQuestion}`,
+      fields: [
+        { name: "User", value: `<@${message.author.id}>`, inline: true },
+        { name: "Parts Sent", value: `${partsSent}`, inline: true },
+      ],
+    });
+  } catch (error) {
+    await handleError(message, "DeepSeek R1", error, userQuestion);
   }
 }
 
@@ -228,7 +305,10 @@ async function handleError(message, modelName, error, userQuestion = "") {
     description: `**Question:** ${userQuestion}`,
     fields: [
       { name: "Error", value: error.message },
-      { name: "Stack", value: error.stack ? error.stack.substring(0, 1024) : "-" },
+      {
+        name: "Stack",
+        value: error.stack ? error.stack.substring(0, 1024) : "-",
+      },
     ],
   });
 }
