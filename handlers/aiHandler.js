@@ -27,7 +27,6 @@ function formatThinkBlockquote(text) {
   });
 }
 
-// Fungsi membaca isi attachment (txt, pdf, docx)
 async function readAttachment(attachment) {
   const url = attachment.url;
   const name = attachment.name.toLowerCase();
@@ -48,7 +47,6 @@ async function readAttachment(attachment) {
     ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"
   ];
 
-  // Download file
   const response = await axios.get(url, { responseType: "arraybuffer" });
   fs.writeFileSync(tempPath, response.data);
 
@@ -61,7 +59,6 @@ async function readAttachment(attachment) {
       const stats = fs.statSync(tempPath);
       text = `[Image file: ${name}, size: ${stats.size} bytes]\n`;
 
-      // OCR (hanya untuk jpg/png/webp/bmp)
       if (!name.endsWith(".svg") && !name.endsWith(".gif")) {
         text += "\n[OCR Result Start]\n";
         const ocr = await Tesseract.recognize(tempPath, "eng");
@@ -97,7 +94,7 @@ async function readAttachment(attachment) {
   } catch (e) {
     text = "[Failed to read attachment]";
   }
-  fs.unlinkSync(tempPath); // Hapus file setelah dibaca
+  fs.unlinkSync(tempPath);
   return text;
 }
 
