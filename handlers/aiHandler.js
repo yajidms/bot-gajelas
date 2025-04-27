@@ -75,9 +75,9 @@ async function readAttachment(attachment) {
 
   let text = "";
   try {
-    if (codeExtensions.some(ext => name.endsWith(ext))) {
+    if (codeExtensions.some((ext) => name.endsWith(ext))) {
       text = fs.readFileSync(tempPath, "utf8");
-    } else if (imageExtensions.some(ext => name.endsWith(ext))) {
+    } else if (imageExtensions.some((ext) => name.endsWith(ext))) {
       // Metadata
       const stats = fs.statSync(tempPath);
       text = `[Image file: ${name}, size: ${stats.size} bytes]\n`;
@@ -98,15 +98,16 @@ async function readAttachment(attachment) {
       text = result.value;
     } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
       const workbook = XLSX.readFile(tempPath);
-      text = workbook.SheetNames.map(sheetName => {
+      text = workbook.SheetNames.map((sheetName) => {
         const sheet = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName]);
         return `Sheet: ${sheetName}\n${sheet}`;
       }).join("\n\n");
     } else if (name.endsWith(".pptx")) {
       const slides = await pptx2json(tempPath);
       text = slides
-        .map((slide, idx) =>
-          `Slide ${idx + 1}:\n${slide.texts ? slide.texts.join("\n") : ""}`
+        .map(
+          (slide, idx) =>
+            `Slide ${idx + 1}:\n${slide.texts ? slide.texts.join("\n") : ""}`
         )
         .join("\n\n");
     } else if (name.endsWith(".ppt")) {
@@ -222,7 +223,10 @@ async function handleGeminiResponse(
   iconUrl
 ) {
   const userQuestion = message.content.slice(prefix.length).trim();
-  if (!userQuestion && (!message.attachments || message.attachments.size === 0)) {
+  if (
+    !userQuestion &&
+    (!message.attachments || message.attachments.size === 0)
+  ) {
     return message.reply({
       content: `Please write down the issue you want to ask after \`${prefix}\`.`,
       allowedMentions: { repliedUser: false },
@@ -234,16 +238,13 @@ async function handleGeminiResponse(
   for (let i = 0; i < geminiKeys.length; i++) {
     try {
       const usedModel = getGeminiModel(
-        modelName.includes("Flash") ? "gemini-2.5-flash-preview-04-17" : "gemini-2.5-pro-exp-03-25"
+        modelName.includes("Flash")
+          ? "gemini-2.5-flash-preview-04-17"
+          : "gemini-2.5-pro-exp-03-25"
       );
       const response = await usedModel.generateContent(prompt);
       let answer = response.response.text();
-      const partsSent = await sendResponse(
-        message,
-        answer,
-        modelName,
-        iconUrl
-      );
+      const partsSent = await sendResponse(message, answer, modelName, iconUrl);
       // Logging success
       await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
         userId: message.author.id,
@@ -281,7 +282,10 @@ async function handleGeminiResponse(
 
 async function handleLlamaResponse(message, prefix, combinePrompt = (x) => x) {
   const userQuestion = message.content.slice(prefix.length).trim();
-  if (!userQuestion && (!message.attachments || message.attachments.size === 0)) {
+  if (
+    !userQuestion &&
+    (!message.attachments || message.attachments.size === 0)
+  ) {
     return message.reply({
       content: "Please write down the issue you want to ask after `f.llama`.",
       allowedMentions: { repliedUser: false },
@@ -292,9 +296,7 @@ async function handleLlamaResponse(message, prefix, combinePrompt = (x) => x) {
   try {
     const payload = {
       model: llamaModel,
-      messages: [
-        { role: "user", content: [{ type: "text", text: prompt }] },
-      ],
+      messages: [{ role: "user", content: [{ type: "text", text: prompt }] }],
     };
 
     const response = await axios.post(
@@ -336,9 +338,16 @@ async function handleLlamaResponse(message, prefix, combinePrompt = (x) => x) {
   }
 }
 
-async function handleDeepSeekResponse(message, prefix, combinePrompt = (x) => x) {
+async function handleDeepSeekResponse(
+  message,
+  prefix,
+  combinePrompt = (x) => x
+) {
   const userQuestion = message.content.slice(prefix.length).trim();
-  if (!userQuestion && (!message.attachments || message.attachments.size === 0)) {
+  if (
+    !userQuestion &&
+    (!message.attachments || message.attachments.size === 0)
+  ) {
     return message.reply({
       content:
         "Please write down the issue you want to ask after `f.deepseek-r1`.",
