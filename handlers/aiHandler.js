@@ -12,7 +12,8 @@ const Tesseract = require("tesseract.js");
 
 let aiStatus = true;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro-exp-03-25" });
+const geminiProModel = genAI.getGenerativeModel({ model: "gemini-2.5-pro-exp-03-25" });
+const geminiFlashModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-04-17" });
 const togetherApiKey = process.env.TOGETHER_API_KEY;
 const llamaModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
 const deepseekModel = "deepseek-ai/DeepSeek-R1";
@@ -41,7 +42,7 @@ async function readAttachment(attachment) {
     ".less", ".json", ".xml", ".yml", ".yaml", ".md", ".ini", ".cfg", ".toml",
     ".sql", ".asm", ".s", ".h", ".hpp", ".vue", ".coffee", ".erl", ".ex", ".exs",
     ".fs", ".fsx", ".groovy", ".jl", ".lisp", ".clj", ".cljs", ".ml", ".mli",
-    ".nim", ".ps1", ".psm1", ".psd1", ".rkt", ".vb", ".vbs", ".v", ".sv", ".svelte"
+    ".nim", ".ps1", ".psm1", ".psd1", ".rkt", ".vb", ".vbs", ".v", ".sv", ".svelte", ".jar"
   ];
   const imageExtensions = [
     ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"
@@ -100,7 +101,8 @@ async function readAttachment(attachment) {
 
 module.exports = {
   handleAiChat: async (message) => {
-    const geminiPrefix = "f.gemini";
+    const geminiProPrefix = "f.geminipro";
+    const geminiFlashPrefix = "f.geminiflash";
     const llamaPrefix = "f.llama";
     const deepthinkPrefix = "f.deepseek-r1";
 
@@ -121,8 +123,10 @@ module.exports = {
         .setTitle("How to Use AI Chat")
         .setDescription(
           "**Use the following command to ask the AI:**\n\n" +
-            "**Gemini AI:**\n" +
-            "`f.gemini [your question]`\n" +
+            "**Gemini Pro:**\n" +
+            "`f.geminipro [your question]`\n" +
+            "**Gemini Flash:**\n" +
+            "`f.geminiflash [your question]`\n" +
             "**Llama AI:**\n" +
             "`f.llama [your question]`\n" +
             "**DeepSeek R1:**\n" +
@@ -155,8 +159,24 @@ module.exports = {
       return prompt;
     }
 
-    if (message.content.startsWith(geminiPrefix)) {
-      await handleGeminiResponse(message, geminiPrefix, combinePrompt);
+    if (message.content.startsWith(geminiProPrefix)) {
+      await handleGeminiResponse(
+        message,
+        geminiProPrefix,
+        combinePrompt,
+        geminiProModel,
+        "Gemini 2.5 Pro Experimental",
+        "https://i.imgur.com/7FNd7DF.png"
+      );
+    } else if (message.content.startsWith(geminiFlashPrefix)) {
+      await handleGeminiResponse(
+        message,
+        geminiFlashPrefix,
+        combinePrompt,
+        geminiFlashModel,
+        "Gemini 2.5 Flash Experimental",
+        "https://i.imgur.com/7FNd7DF.png"
+      );
     } else if (message.content.startsWith(llamaPrefix)) {
       await handleLlamaResponse(message, llamaPrefix, combinePrompt);
     } else if (message.content.startsWith(deepthinkPrefix)) {
@@ -171,24 +191,31 @@ module.exports = {
   getAiStatus: () => aiStatus,
 };
 
-async function handleGeminiResponse(message, prefix, combinePrompt = (x) => x) {
+async function handleGeminiResponse(
+  message,
+  prefix,
+  combinePrompt = (x) => x,
+  usedModel,
+  modelName,
+  iconUrl
+) {
   const userQuestion = message.content.slice(prefix.length).trim();
   if (!userQuestion && (!message.attachments || message.attachments.size === 0)) {
     return message.reply({
-      content: "Please write down the issue you want to ask after `f.gemini`.",
+      content: `Please write down the issue you want to ask after \`${prefix}\`.`,
       allowedMentions: { repliedUser: false },
     });
   }
   const prompt = combinePrompt(userQuestion);
 
   try {
-    const response = await model.generateContent(prompt);
+    const response = await usedModel.generateContent(prompt);
     let answer = response.response.text();
     const partsSent = await sendResponse(
       message,
       answer,
-      "Gemini AI 2.5 Pro Experimental",
-      "https://i.imgur.com/7FNd7DF.png"
+      modelName,
+      iconUrl
     );
 
     // Logging success
@@ -199,7 +226,7 @@ async function handleGeminiResponse(message, prefix, combinePrompt = (x) => x) {
         name: message.author.tag,
         icon_url: message.author.displayAvatarURL(),
       },
-      title: "Gemini AI Request Processed",
+      title: `${modelName} Request Processed`,
       description: `**Question:** ${userQuestion}`,
       fields: [
         { name: "User", value: `<@${message.author.id}>`, inline: true },
@@ -207,7 +234,7 @@ async function handleGeminiResponse(message, prefix, combinePrompt = (x) => x) {
       ],
     });
   } catch (error) {
-    await handleError(message, "Gemini", error, userQuestion);
+    await handleError(message, modelName, error, userQuestion);
   }
 }
 
