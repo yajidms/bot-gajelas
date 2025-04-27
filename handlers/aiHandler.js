@@ -11,9 +11,31 @@ const pptx2json = require("pptx2json");
 const Tesseract = require("tesseract.js");
 
 let aiStatus = true;
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const geminiProModel = genAI.getGenerativeModel({ model: "gemini-2.5-pro-exp-03-25" });
-const geminiFlashModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-04-17" });
+
+// === Gemini API Key Switcher ===
+const geminiKeys = [
+  process.env.GEMINI_API_KEY_1,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+  process.env.GEMINI_API_KEY_4,
+].filter(Boolean);
+
+let currentGeminiKeyIndex = 0;
+
+function getActiveGeminiKey() {
+  return geminiKeys[currentGeminiKeyIndex];
+}
+
+function switchGeminiKey() {
+  currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % geminiKeys.length;
+}
+
+function getGeminiModel(modelName) {
+  const genAI = new GoogleGenerativeAI(getActiveGeminiKey());
+  return genAI.getGenerativeModel({ model: modelName });
+}
+// === End Gemini API Key Switcher ===
+
 const togetherApiKey = process.env.TOGETHER_API_KEY;
 const llamaModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
 const deepseekModel = "deepseek-ai/DeepSeek-R1";
@@ -164,7 +186,7 @@ module.exports = {
         message,
         geminiProPrefix,
         combinePrompt,
-        geminiProModel,
+        null,
         "Gemini 2.5 Pro Experimental",
         "https://i.imgur.com/7FNd7DF.png"
       );
@@ -173,7 +195,7 @@ module.exports = {
         message,
         geminiFlashPrefix,
         combinePrompt,
-        geminiFlashModel,
+        null,
         "Gemini 2.5 Flash Experimental",
         "https://i.imgur.com/7FNd7DF.png"
       );
@@ -195,7 +217,7 @@ async function handleGeminiResponse(
   message,
   prefix,
   combinePrompt = (x) => x,
-  usedModel,
+  _unused,
   modelName,
   iconUrl
 ) {
@@ -208,34 +230,53 @@ async function handleGeminiResponse(
   }
   const prompt = combinePrompt(userQuestion);
 
-  try {
-    const response = await usedModel.generateContent(prompt);
-    let answer = response.response.text();
-    const partsSent = await sendResponse(
-      message,
-      answer,
-      modelName,
-      iconUrl
-    );
-
-    // Logging success
-    await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
-      userId: message.author.id,
-      messageId: message.id,
-      author: {
-        name: message.author.tag,
-        icon_url: message.author.displayAvatarURL(),
-      },
-      title: `${modelName} Request Processed`,
-      description: `**Question:** ${userQuestion}`,
-      fields: [
-        { name: "User", value: `<@${message.author.id}>`, inline: true },
-        { name: "Parts Sent", value: `${partsSent}`, inline: true },
-      ],
-    });
-  } catch (error) {
-    await handleError(message, modelName, error, userQuestion);
+  let lastError;
+  for (let i = 0; i < geminiKeys.length; i++) {
+    try {
+      const usedModel = getGeminiModel(
+        modelName.includes("Flash") ? "gemini-2.5-flash-preview-04-17" : "gemini-2.5-pro-exp-03-25"
+      );
+      const response = await usedModel.generateContent(prompt);
+      let answer = response.response.text();
+      const partsSent = await sendResponse(
+        message,
+        answer,
+        modelName,
+        iconUrl
+      );
+      // Logging success
+      await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
+        userId: message.author.id,
+        messageId: message.id,
+        author: {
+          name: message.author.tag,
+          icon_url: message.author.displayAvatarURL(),
+        },
+        title: `${modelName} Request Processed`,
+        description: `**Question:** ${userQuestion}`,
+        fields: [
+          { name: "User", value: `<@${message.author.id}>`, inline: true },
+          { name: "Parts Sent", value: `${partsSent}`, inline: true },
+        ],
+      });
+      return;
+    } catch (error) {
+      lastError = error;
+      // Deteksi error limit/quota
+      if (
+        error.message &&
+        (error.message.toLowerCase().includes("quota") ||
+          error.message.toLowerCase().includes("limit") ||
+          error.message.toLowerCase().includes("exceeded"))
+      ) {
+        switchGeminiKey();
+        continue;
+      } else {
+        break;
+      }
+    }
   }
+  await handleError(message, modelName, lastError, userQuestion);
 }
 
 async function handleLlamaResponse(message, prefix, combinePrompt = (x) => x) {
