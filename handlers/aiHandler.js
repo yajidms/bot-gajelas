@@ -6,6 +6,9 @@ const fs = require("fs");
 const path = require("path");
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
+const XLSX = require("xlsx");
+const pptxParser = require("pptx-parser");
+const Tesseract = require("tesseract.js");
 
 let aiStatus = true;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
