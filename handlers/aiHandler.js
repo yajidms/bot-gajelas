@@ -7,7 +7,7 @@ const path = require("path");
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
 const XLSX = require("xlsx");
-const pptxParser = require("pptx-parser");
+const pptx2json = require("pptx2json");
 const Tesseract = require("tesseract.js");
 
 let aiStatus = true;
@@ -35,14 +35,39 @@ async function readAttachment(attachment) {
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
   const tempPath = path.join(tempDir, `${Date.now()}_${name}`);
 
+  const codeExtensions = [
+    ".txt", ".js", ".ts", ".jsx", ".tsx", ".py", ".java", ".c", ".cpp", ".cs",
+    ".rb", ".go", ".php", ".swift", ".kt", ".kts", ".rs", ".scala", ".sh",
+    ".bat", ".pl", ".lua", ".r", ".m", ".vb", ".dart", ".html", ".css", ".scss",
+    ".less", ".json", ".xml", ".yml", ".yaml", ".md", ".ini", ".cfg", ".toml",
+    ".sql", ".asm", ".s", ".h", ".hpp", ".vue", ".coffee", ".erl", ".ex", ".exs",
+    ".fs", ".fsx", ".groovy", ".jl", ".lisp", ".clj", ".cljs", ".ml", ".mli",
+    ".nim", ".ps1", ".psm1", ".psd1", ".rkt", ".vb", ".vbs", ".v", ".sv", ".svelte"
+  ];
+  const imageExtensions = [
+    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"
+  ];
+
   // Download file
   const response = await axios.get(url, { responseType: "arraybuffer" });
   fs.writeFileSync(tempPath, response.data);
 
   let text = "";
   try {
-    if (name.endsWith(".txt")) {
+    if (codeExtensions.some(ext => name.endsWith(ext))) {
       text = fs.readFileSync(tempPath, "utf8");
+    } else if (imageExtensions.some(ext => name.endsWith(ext))) {
+      // Metadata
+      const stats = fs.statSync(tempPath);
+      text = `[Image file: ${name}, size: ${stats.size} bytes]\n`;
+
+      // OCR (hanya untuk jpg/png/webp/bmp)
+      if (!name.endsWith(".svg") && !name.endsWith(".gif")) {
+        text += "\n[OCR Result Start]\n";
+        const ocr = await Tesseract.recognize(tempPath, "eng");
+        text += ocr.data.text.trim() || "(No text detected)";
+        text += "\n[OCR Result End]";
+      }
     } else if (name.endsWith(".pdf")) {
       const data = fs.readFileSync(tempPath);
       const pdf = await pdfParse(data);
@@ -51,6 +76,21 @@ async function readAttachment(attachment) {
       const data = fs.readFileSync(tempPath);
       const result = await mammoth.extractRawText({ buffer: data });
       text = result.value;
+    } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
+      const workbook = XLSX.readFile(tempPath);
+      text = workbook.SheetNames.map(sheetName => {
+        const sheet = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName]);
+        return `Sheet: ${sheetName}\n${sheet}`;
+      }).join("\n\n");
+    } else if (name.endsWith(".pptx")) {
+      const slides = await pptx2json(tempPath);
+      text = slides
+        .map((slide, idx) =>
+          `Slide ${idx + 1}:\n${slide.texts ? slide.texts.join("\n") : ""}`
+        )
+        .join("\n\n");
+    } else if (name.endsWith(".ppt")) {
+      text = "[.ppt format not supported, use .pptx]";
     } else {
       text = "[Unsupported file type]";
     }
