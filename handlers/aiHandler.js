@@ -5,7 +5,7 @@ const { sendLog } = require("./logHandler");
 
 let aiStatus = true;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro-exp-03-25" });
 const togetherApiKey = process.env.TOGETHER_API_KEY;
 const llamaModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
 const deepseekModel = "deepseek-ai/DeepSeek-R1";
@@ -89,8 +89,8 @@ async function handleGeminiResponse(message, prefix) {
     const partsSent = await sendResponse(
       message,
       answer,
-      "Gemini AI 2.0 Flash",
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThr7qrIazsvZwJuw-uZCtLzIjaAyVW_ZrlEQ&s"
+      "Gemini AI 2.5 Pro Experimental",
+      "https://i.imgur.com/7FNd7DF.png"
     );
 
     // Logging success
@@ -157,7 +157,7 @@ async function handleLlamaResponse(message, prefix) {
         name: message.author.tag,
         icon_url: message.author.displayAvatarURL(),
       },
-      title: "Llama 4 Maverick AI Request Processed",
+      title: "Llama AI Request Processed",
       description: `**Question:** ${userQuestion}`,
       fields: [
         { name: "User", value: `<@${message.author.id}>`, inline: true },
@@ -204,7 +204,7 @@ async function handleDeepSeekResponse(message, prefix) {
       message,
       answer,
       "DeepSeek R1",
-      "blob:https://imgur.com/910354e1-c151-408a-b4d8-4f8b5530a2ec"
+      "https://i.imgur.com/yIilZ11.png"
     );
 
     // Logging success
@@ -215,7 +215,7 @@ async function handleDeepSeekResponse(message, prefix) {
         name: message.author.tag,
         icon_url: message.author.displayAvatarURL(),
       },
-      title: "DeepSeek R1 Request Processed",
+      title: "DeepSeek Request Processed",
       description: `**Question:** ${userQuestion}`,
       fields: [
         { name: "User", value: `<@${message.author.id}>`, inline: true },
