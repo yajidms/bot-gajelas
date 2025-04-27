@@ -2,6 +2,10 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const axios = require("axios");
 const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
 const { sendLog } = require("./logHandler");
+const fs = require("fs");
+const path = require("path");
+const pdfParse = require("pdf-parse");
+const mammoth = require("mammoth");
 
 let aiStatus = true;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -18,6 +22,40 @@ function formatThinkBlockquote(text) {
       .map((line) => (line.trim() ? `-# ${line}` : ""))
       .join("\n");
   });
+}
+
+// Fungsi membaca isi attachment (txt, pdf, docx)
+async function readAttachment(attachment) {
+  const url = attachment.url;
+  const name = attachment.name.toLowerCase();
+  const tempDir = path.join(__dirname, "../temp");
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+  const tempPath = path.join(tempDir, `${Date.now()}_${name}`);
+
+  // Download file
+  const response = await axios.get(url, { responseType: "arraybuffer" });
+  fs.writeFileSync(tempPath, response.data);
+
+  let text = "";
+  try {
+    if (name.endsWith(".txt")) {
+      text = fs.readFileSync(tempPath, "utf8");
+    } else if (name.endsWith(".pdf")) {
+      const data = fs.readFileSync(tempPath);
+      const pdf = await pdfParse(data);
+      text = pdf.text;
+    } else if (name.endsWith(".docx")) {
+      const data = fs.readFileSync(tempPath);
+      const result = await mammoth.extractRawText({ buffer: data });
+      text = result.value;
+    } else {
+      text = "[Unsupported file type]";
+    }
+  } catch (e) {
+    text = "[Failed to read attachment]";
+  }
+  fs.unlinkSync(tempPath); // Hapus file setelah dibaca
+  return text;
 }
 
 module.exports = {
@@ -49,7 +87,7 @@ module.exports = {
             "`f.llama [your question]`\n" +
             "**DeepSeek R1:**\n" +
             "`f.deepseek-r1 [your question]`\n" +
-            "_Make sure the prefix is followed by a space and then your question!_"
+            "_You can also attach a .txt, .pdf, or .docx file to include its content in your question!_"
         )
         .setColor(0x5865f2);
       return message.reply({
@@ -58,12 +96,31 @@ module.exports = {
       });
     }
 
+    // Cek jika ada attachment
+    let fileContent = "";
+    if (message.attachments && message.attachments.size > 0) {
+      const attachment = message.attachments.first();
+      try {
+        fileContent = await readAttachment(attachment);
+      } catch (e) {
+        fileContent = "[Failed to read attachment]";
+      }
+    }
+
+    // Gabungkan fileContent ke prompt jika ada
+    function combinePrompt(prompt) {
+      if (fileContent) {
+        return `${prompt}\n\n[File Content Start]\n${fileContent}\n[File Content End]`;
+      }
+      return prompt;
+    }
+
     if (message.content.startsWith(geminiPrefix)) {
-      await handleGeminiResponse(message, geminiPrefix);
+      await handleGeminiResponse(message, geminiPrefix, combinePrompt);
     } else if (message.content.startsWith(llamaPrefix)) {
-      await handleLlamaResponse(message, llamaPrefix);
+      await handleLlamaResponse(message, llamaPrefix, combinePrompt);
     } else if (message.content.startsWith(deepthinkPrefix)) {
-      await handleDeepSeekResponse(message, deepthinkPrefix);
+      await handleDeepSeekResponse(message, deepthinkPrefix, combinePrompt);
     }
   },
 
@@ -74,17 +131,18 @@ module.exports = {
   getAiStatus: () => aiStatus,
 };
 
-async function handleGeminiResponse(message, prefix) {
+async function handleGeminiResponse(message, prefix, combinePrompt = (x) => x) {
   const userQuestion = message.content.slice(prefix.length).trim();
-  if (!userQuestion) {
+  if (!userQuestion && (!message.attachments || message.attachments.size === 0)) {
     return message.reply({
       content: "Please write down the issue you want to ask after `f.gemini`.",
       allowedMentions: { repliedUser: false },
     });
   }
+  const prompt = combinePrompt(userQuestion);
 
   try {
-    const response = await model.generateContent(userQuestion);
+    const response = await model.generateContent(prompt);
     let answer = response.response.text();
     const partsSent = await sendResponse(
       message,
@@ -113,20 +171,21 @@ async function handleGeminiResponse(message, prefix) {
   }
 }
 
-async function handleLlamaResponse(message, prefix) {
+async function handleLlamaResponse(message, prefix, combinePrompt = (x) => x) {
   const userQuestion = message.content.slice(prefix.length).trim();
-  if (!userQuestion) {
+  if (!userQuestion && (!message.attachments || message.attachments.size === 0)) {
     return message.reply({
       content: "Please write down the issue you want to ask after `f.llama`.",
       allowedMentions: { repliedUser: false },
     });
   }
+  const prompt = combinePrompt(userQuestion);
 
   try {
     const payload = {
       model: llamaModel,
       messages: [
-        { role: "user", content: [{ type: "text", text: userQuestion }] },
+        { role: "user", content: [{ type: "text", text: prompt }] },
       ],
     };
 
@@ -169,20 +228,21 @@ async function handleLlamaResponse(message, prefix) {
   }
 }
 
-async function handleDeepSeekResponse(message, prefix) {
+async function handleDeepSeekResponse(message, prefix, combinePrompt = (x) => x) {
   const userQuestion = message.content.slice(prefix.length).trim();
-  if (!userQuestion) {
+  if (!userQuestion && (!message.attachments || message.attachments.size === 0)) {
     return message.reply({
       content:
         "Please write down the issue you want to ask after `f.deepseek-r1`.",
       allowedMentions: { repliedUser: false },
     });
   }
+  const prompt = combinePrompt(userQuestion);
 
   try {
     const payload = {
       model: deepseekModel,
-      messages: [{ role: "user", content: userQuestion }],
+      messages: [{ role: "user", content: prompt }],
       stream: false,
     };
 
