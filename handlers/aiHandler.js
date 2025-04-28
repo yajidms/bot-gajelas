@@ -166,12 +166,20 @@ module.exports = {
     // Cek jika ada attachment
     let fileContent = "";
     if (message.attachments && message.attachments.size > 0) {
-      const attachment = message.attachments.first();
-      try {
-        fileContent = await readAttachment(attachment);
-      } catch (e) {
-        fileContent = "[Failed to read attachment]";
+      const fileContents = [];
+      for (const attachment of message.attachments.values()) {
+        try {
+          const content = await readAttachment(attachment);
+          fileContents.push(
+            `--- File: ${attachment.name} ---\n${content}\n--- End of ${attachment.name} ---`
+          );
+        } catch (e) {
+          fileContents.push(
+            `--- File: ${attachment.name} ---\n[Failed to read attachment]\n--- End of ${attachment.name} ---`
+          );
+        }
       }
+      fileContent = fileContents.join("\n\n");
     }
 
     // Gabungkan fileContent ke prompt jika ada
