@@ -35,10 +35,7 @@ CLIENT_ID=ID_APLIKASI_BOT_ANDA
 
 # --- API Keys (Penting untuk Fitur AI & Downloader) ---
 # Gemini (Diperlukan minimal 1, bisa sampai 4 untuk failover)
-GEMINI_API_KEY_1=KUNCI_API_GEMINI_ANDA_1
-GEMINI_API_KEY_2=KUNCI_API_GEMINI_ANDA_2 # Opsional
-GEMINI_API_KEY_3=KUNCI_API_GEMINI_ANDA_3 # Opsional
-GEMINI_API_KEY_4=KUNCI_API_GEMINI_ANDA_4 # Opsional
+GEMINI_API_KEY=KUNCI_API_GEMINI_ANDA
 
 # Together AI (Untuk Llama & DeepSeek)
 TOGETHER_API_KEY=KUNCI_API_TOGETHER_AI_ANDA
