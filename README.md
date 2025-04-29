@@ -95,9 +95,9 @@ Gunakan prefix `f.` diikuti dengan URL untuk mengunduh media:
 Berinteraksi dengan model AI canggih:
 
 * **Prefix Command:**
-    * `f.geminipro <pertanyaan>`: Tanya Gemini Pro (Eksperimental).
-    * `f.geminiflash <pertanyaan>`: Tanya Gemini Flash (Eksperimental).
-    * `f.llama <pertanyaan>`: Tanya Llama 4 Maverick.
+    * `f.geminipro <pertanyaan>`: Tanya Gemini Pro.
+    * `f.geminiflash <pertanyaan>`: Tanya Gemini Flash.
+    * `f.llama <pertanyaan>`: Tanya Llama.
     * `f.deepseek-r1 <pertanyaan>`: Tanya DeepSeek R1.
     * *(Anda juga bisa melampirkan file (txt, pdf, docx, xlsx, pptx, gambar) saat menggunakan perintah ini!)*
 * **Slash Command:**
