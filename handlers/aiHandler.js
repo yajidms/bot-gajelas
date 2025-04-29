@@ -13,7 +13,12 @@ const Tesseract = require("tesseract.js");
 let aiStatus = true;
 
 // === Gemini API Key Switcher ===
-const geminiKeys = [process.env.GEMINI_API_KEY];
+const geminiKeys = [
+  process.env.GEMINI_API_KEY_1,
+  process.env.GEMINI_API_KEY_2,
+  process.env.GEMINI_API_KEY_3,
+  process.env.GEMINI_API_KEY_4,
+].filter(Boolean);
 
 let currentGeminiKeyIndex = 0;
 
