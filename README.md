@@ -48,10 +48,8 @@ EMBED_EZ_API_KEY=
 LOG_CHANNEL_ID=
 DEV_LOG_CHANNEL_ID=
 
-# Role & Fitur Spesifik
+# Role
 MUTED_ROLE_ID=
-QUOTE_CHANNEL_ID=
-QOTD_TIME=01:00 # Waktu UTC untuk mengirim Quote of the Day (Format HH:mm)
 
 # ID Developer (Pisahkan dengan koma jika lebih dari satu)
 DEV_ID=ID
