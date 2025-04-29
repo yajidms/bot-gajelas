@@ -1,4 +1,4 @@
-# Cara Menggunakan Source Code Bot Furina
+# Cara Menggunakan Source Bot Furina
 
 Selamat datang di source bot Furina. Bot ini siap menghancurkan server Anda dengan berbagai fitur gajelas. Ikuti langkah-langkah ini untuk memulai:
 [bagi yang mau menggunakan bot ini](https://discord.com/oauth2/authorize?client_id=1351007630092668988&permissions=8&integration_type=0&scope=bot)
@@ -14,7 +14,7 @@ Pastikan Anda memiliki VS Code Atau VSCodium (TIDAK MENERIMA NEOVIM) terinstal:
 
 1.  **Clone Repositori:** Dapatkan kode bot ke komputer Anda.
     ```bash
-    git clone <URL_REPOSITORI_ANDA>
+    git clone
     cd bot-gajelas
     ```
 2.  **Instal Dependensi:** Pasang semua paket yang dibutuhkan bot.
@@ -34,30 +34,30 @@ DISCORD_TOKEN=TOKEN_BOT_DISCORD_ANDA
 CLIENT_ID=ID_APLIKASI_BOT_ANDA
 
 # --- API Keys (Penting untuk Fitur AI & Downloader) ---
-# Gemini (Diperlukan minimal 1, bisa sampai 4 untuk failover)
-GEMINI_API_KEY=KUNCI_API_GEMINI_ANDA
+# Gemini
+GEMINI_API_KEY=
 
 # Together AI (Untuk Llama & DeepSeek)
-TOGETHER_API_KEY=KUNCI_API_TOGETHER_AI_ANDA
+TOGETHER_API_KEY=
 
 # EmbedEZ (Untuk embed otomatis)
-EMBED_EZ_API_KEY=KUNCI_API_EMBEDEZ_ANDA
+EMBED_EZ_API_KEY=
 
 # --- ID Channel & Role (Sesuaikan dengan server Anda) ---
 # Logging
-LOG_CHANNEL_ID=ID_CHANNEL_LOG_UTAMA_ANDA
-DEV_LOG_CHANNEL_ID=ID_CHANNEL_LOG_DEVELOPER_ANDA # Untuk log restart, set status, dll.
+LOG_CHANNEL_ID=
+DEV_LOG_CHANNEL_ID=
 
 # Role & Fitur Spesifik
-MUTED_ROLE_ID=ID_ROLE_MUTE_ANDA
-QUOTE_CHANNEL_ID=ID_CHANNEL_QUOTE_ANDA
+MUTED_ROLE_ID=
+QUOTE_CHANNEL_ID=
 QOTD_TIME=01:00 # Waktu UTC untuk mengirim Quote of the Day (Format HH:mm)
 
 # ID Developer (Pisahkan dengan koma jika lebih dari satu)
-DEV_ID=ID_DEVELOPER_1,ID_DEVELOPER_2
+DEV_ID=ID
 
 # ID Guild (Server) tempat bot aktif (Pisahkan dengan koma jika lebih dari satu)
-GUILD_ID=ID_SERVER_ANDA_1,ID_SERVER_ANDA_2
+GUILD_ID=
 ```
 
 **Penting:** Jangan pernah membagikan file `.env` atau token bot Anda kepada siapa pun!
