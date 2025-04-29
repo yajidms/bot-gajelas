@@ -14,7 +14,7 @@ Pastikan Anda memiliki VS Code Atau VSCodium (TIDAK MENERIMA NEOVIM) terinstal:
 
 1.  **Clone Repositori:** Dapatkan kode bot ke komputer Anda.
     ```bash
-    git clone
+    git clone <https://github.com/yajidms/bot-gajelas.git>
     cd bot-gajelas
     ```
 2.  **Instal Dependensi:** Pasang semua paket yang dibutuhkan bot.
