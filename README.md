@@ -1,6 +1,6 @@
 # Cara Menggunakan Source Code Bot Gajelas Ini 😂
 
-Selamat datang di panduan penggunaan bot Discord gajelas ini Bot ini siap menghancurkan server Anda dengan berbagai fitur gajelas. Ikuti langkah-langkah ini untuk memulai:
+Selamat datang di source bot Discord gajelas. Bot ini siap menghancurkan server Anda dengan berbagai fitur gajelas. Ikuti langkah-langkah ini untuk memulai:
 
 ## 📋 Prasyarat
 
