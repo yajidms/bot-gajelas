@@ -157,9 +157,9 @@ Hanya untuk pengguna dengan ID yang terdaftar di `.env`:
 
 ---
 
-Selamat botnya gk jadi ! Jika Anda menemukan bug atau memiliki saran, jangan ragu untuk report nih commit.
-```
+Selamat botnya gk jadi ! Jika Anda menemukan bug atau memiliki saran, jangan ragu untuk report nih repository.
 
+```
 Bagian ini mencakup:
 * Langkah instalasi yang jelas.
 * Penjelasan detail tentang konfigurasi `.env` yang diperlukan.
@@ -167,6 +167,7 @@ Bagian ini mencakup:
 * Ringkasan fitur utama yang dikategorikan (Downloader, AI, Embed, Utilitas, Moderasi, Developer).
 * Contoh penggunaan untuk perintah prefix.
 * Penggunaan markdown dan emoji untuk membuatnya lebih menarik secara visual.
+```
 
 gajelas, tutup aja nih commit
 
