@@ -1,4 +1,3 @@
-```markdown
 # 🚀 Cara Menggunakan Bot Serbaguna Ini 🚀
 
 Selamat datang di panduan penggunaan bot Discord multifungsi kami! Bot ini siap membantu Anda dengan berbagai fitur keren. Ikuti langkah-langkah ini untuk memulai:
