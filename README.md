@@ -1,6 +1,7 @@
 # Cara Menggunakan Source Code Bot Gajelas Ini 😂
 
-Selamat datang di source bot Discord gajelas. Bot ini siap menghancurkan server Anda dengan berbagai fitur gajelas. Ikuti langkah-langkah ini untuk memulai:
+Selamat datang di source bot Furina. Bot ini siap menghancurkan server Anda dengan berbagai fitur gajelas. Ikuti langkah-langkah ini untuk memulai:
+[bagi yang mau menggunakan bot ini](https://discord.com/oauth2/authorize?client_id=1351007630092668988&permissions=8&integration_type=0&scope=bot)
 
 ## 📋 Prasyarat
 
