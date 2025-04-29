@@ -1,10 +1,10 @@
-# 🚀 Cara Menggunakan Bot Serbaguna Ini 🚀
+# Cara Menggunakan Source Code Bot Gajelas Ini 😂
 
-Selamat datang di panduan penggunaan bot Discord multifungsi kami! Bot ini siap membantu Anda dengan berbagai fitur keren. Ikuti langkah-langkah ini untuk memulai:
+Selamat datang di panduan penggunaan bot Discord gajelas ini Bot ini siap menghancurkan server Anda dengan berbagai fitur gajelas. Ikuti langkah-langkah ini untuk memulai:
 
 ## 📋 Prasyarat
 
-Pastikan Anda memiliki perangkat lunak berikut terinstal:
+Pastikan Anda memiliki VS Code Atau VSCodium (TIDAK MENERIMA NEOVIM) terinstal:
 
 * **Node.js:** (Versi 18 atau lebih baru direkomendasikan)
 * **npm** atau **yarn:** Manajer paket Node.js
@@ -25,7 +25,7 @@ Pastikan Anda memiliki perangkat lunak berikut terinstal:
 
 ## 🔑 Konfigurasi Penting (`.env`)
 
-Buat file bernama `.env` di direktori utama proyek dan isi dengan variabel lingkungan yang diperlukan. Ini adalah kunci agar bot berfungsi dengan baik!
+Buat file bernama `.env` di direktori utama proyek dengan isi API Key dan ID Bot dan ID User. Ini adalah kunci agar bot berfungsi dengan baik!
 
 ```dotenv
 # --- Kredensial Utama ---
@@ -157,7 +157,7 @@ Hanya untuk pengguna dengan ID yang terdaftar di `.env`:
 
 ---
 
-Selamat menggunakan bot ini! Jika Anda menemukan bug atau memiliki saran, jangan ragu untuk memberitahu pengembang. 🎉
+Selamat botnya gk jadi ! Jika Anda menemukan bug atau memiliki saran, jangan ragu untuk report nih commit.
 ```
 
 Bagian ini mencakup:
@@ -167,3 +167,71 @@ Bagian ini mencakup:
 * Ringkasan fitur utama yang dikategorikan (Downloader, AI, Embed, Utilitas, Moderasi, Developer).
 * Contoh penggunaan untuk perintah prefix.
 * Penggunaan markdown dan emoji untuk membuatnya lebih menarik secara visual.
+
+gajelas, tutup aja nih commit
+
+Berikut adalah resep sederhana untuk membuat roti jahe (gingerbread cookies) yang renyah dan beraroma khas rempah:
+
+Bahan:
+
+350 g tepung terigu serbaguna
+
+1 sdt baking soda
+
+2 sdt bubuk jahe
+
+1 sdt bubuk kayu manis
+
+½ sdt bubuk pala
+
+½ sdt garam
+
+125 g mentega, suhu ruang
+
+100 g gula palem
+
+100 g madu atau molase
+
+1 butir telur
+
+Cara Membuat:
+
+Campur bahan kering:
+
+Ayak tepung terigu, baking soda, bubuk jahe, kayu manis, pala, dan garam dalam satu wadah. Sisihkan.
+
+Kocok mentega dan gula:
+
+Gunakan mixer atau whisk untuk mengocok mentega dan gula palem hingga lembut dan mengembang.
+
+Tambahkan bahan basah:
+
+Masukkan madu/molase dan telur, lalu aduk rata.
+
+Campurkan bahan kering ke bahan basah:
+
+Masukkan campuran tepung sedikit demi sedikit sambil diaduk hingga menjadi adonan yang bisa dipulung.
+
+Dinginkan adonan:
+
+Bungkus adonan dengan plastik wrap dan simpan di kulkas selama 1 jam agar lebih mudah dibentuk.
+
+Cetak dan panggang:
+
+Panaskan oven ke suhu 175°C.
+
+Gilas adonan dengan ketebalan sekitar 5 mm, lalu cetak sesuai selera (misalnya bentuk manusia roti jahe).
+
+Susun di atas loyang yang sudah dialasi kertas baking.
+
+Panggang hingga matang:
+
+Panggang selama 8-12 menit, tergantung ketebalan adonan dan ukuran cetakan.
+
+Biarkan dingin sebelum dihias.
+
+Hias sesuai selera (opsional):
+
+Gunakan royal icing (campuran putih telur dan gula halus) atau cokelat leleh untuk dekorasi.
+
+Roti jahe ini cocok untuk camilan atau hadiah spesial, terutama saat musim liburan! Selamat mencoba!
