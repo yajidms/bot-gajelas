@@ -30,8 +30,8 @@ Buat file bernama `.env` di direktori utama proyek dengan isi API Key dan ID Bot
 
 ```dotenv
 # --- Kredensial Utama ---
-DISCORD_TOKEN=TOKEN_BOT_DISCORD_ANDA
-CLIENT_ID=ID_APLIKASI_BOT_ANDA
+DISCORD_TOKEN=
+CLIENT_ID=
 
 # --- API Keys (Penting untuk Fitur AI & Downloader) ---
 # Gemini
