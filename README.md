@@ -1,23 +1,23 @@
 # How to Use Furina Source Bot
 
-Welcome to the Furina bot source. This bot is ready to destroy your server with a variety of unclear features. Follow these steps to get started:
-[For those who want to use this Furina bot, click this blue text or link](https://discord.com/oauth2/authorize?client_id=1351007630092668988&permissions=8&integration_type=0&scope=bot)
+Welcome to the Furina bot source. This bot is ready to destroy your server with a variety of gajelas (unclear) features. Follow these steps to get started:
+[for those who want to use this bot Furina, take this blue text or link](https://discord.com/oauth2/authorize?client_id=1351007630092668988&permissions=8&integration_type=0&scope=bot)
 
 ## 📋 Prerequisites
 
-Make sure you have VS Code or VS Codium installed (DOES NOT ACCEPT NEOVIM):
+Make sure you have `VS Code Or VS Codium (DOES NOT ACCEPT NEOVIM)` installed:
 
 * **Node.js:** (Version 21 or later is recommended)
-* **npm** or **yarn:** Node.js package manager
+* **npm** or **yarn:** `Node.js package manager`
 
 ## ⚙️ Installation
 
-1.  **Clone Repository:** Get the bot's code into your computer.
+1.  **Clone Repository:** Get the bot code to your computer.
     ```bash
     git clone https://github.com/yajidms/bot-gajelas.git
     cd bot-gajelas
     ```
-2.  **Install Dependencies:** Install all the packages the bot requires.
+2.  **Install Dependencies:** Install all the packages the bot needs.
     ```bash
     npm install
     # or if using yarn
@@ -26,7 +26,7 @@ Make sure you have VS Code or VS Codium installed (DOES NOT ACCEPT NEOVIM):
 
 ## 🔑 Important Configuration (`.env`)
 
-Create a file named `.env` in the project's root directory containing the API Keys, Bot ID, and User IDs. This is crucial for the bot to function correctly!
+Create a file called `.env` in the main directory of the project with the contents of the `API Key` and `Bot ID` and `User ID`. This is key for the bot to work properly!
 
 ```dotenv
 # --- Key Credentials ---
@@ -41,7 +41,7 @@ GEMINI_API_KEY=
 TOGETHER_API_KEY=
 DEEPINFRA_KEY=
 
-# --- Channel & Role IDs (Customize for your server) ---
+# --- ID Channel & Role (Customize with your server) ---
 # Logging
 LOG_CHANNEL_ID=
 DEV_LOG_CHANNEL_ID=
@@ -59,7 +59,7 @@ GUILD_ID=
 
 ## ▶️ Running the Bot
 
-Once the configuration is complete, run the bot using the command:
+Once the configuration is complete, run the bot with the command:
 
 ```bash
 npm start
@@ -71,19 +71,19 @@ The bot will go online and be ready to receive commands!
 
 ## ✨ Main Features & Commands
 
-This bot comes with various commands, accessible via both *prefix* and *slash commands* (`/`).
+This bot comes with various commands, accessible via both `prefix` and `slash command` (`/`).
 
 ### 📥 Media Downloader (Prefix Command)
 
-Use the prefix `f.` followed by the URL to download media:
+Use the `prefix` `f.` followed by the `URL` to download media:
 
-* `f.ig <Instagram Reel URL>`: Download videos from Instagram Reels.
-* `f.fb <Facebook Video URL>`: Download videos from Facebook.
-* `f.tt <TikTok Video URL>`: Download videos from TikTok.
-* `f.yt <YouTube Video URL>`: Download videos from YouTube (480p quality).
-* `f.x <Twitter/X Video URL>`: Download videos from Twitter/X.
+* `f.ig <URL Instagram Reel>`: Download video from Instagram Reels.
+* `f.fb <URL Video Facebook>`: Download video from Facebook.
+* `f.tt <URL Video TikTok>`: Download video from TikTok.
+* `f.yt <URL Video YouTube>`: Download video from YouTube (480p quality).
+* `f.x <URL Video Twitter/X>`: Download video from Twitter/X.
 
-*Example:* `f.ig https://www.instagram.com/reel/example123/`
+*Example:* `f.ig https://www.instagram.com/reel/contoh123/`
 
 ### 🧠 AI Features (Prefix & Slash Command)
 
@@ -96,7 +96,7 @@ Interact with advanced AI models:
     * `f.deepseek-r1 <question>`: Ask DeepSeek R1.
     * *(You can also attach files (txt, pdf, docx, xlsx, pptx, images) when using these commands!)*
 * **Slash Command:**
-    * `/aichat [initial_prompt] [file]`: Start an interactive chat session with Gemini 2.5 Flash within a forum *thread*. Attach files if needed.
+    * `/aichat [initial_prompt] [file]`: Start an interactive chat session with `Gemini 2.5 Flash` within a forum *thread*. Attach files if needed.
     * `/aichat_end`: Ends the currently active `/aichat` session in the *thread*.
 
 ### 🛠️ Utilities (Slash Command)
@@ -105,7 +105,7 @@ Everyday helper commands:
 
 * `/help`: Displays a list of all available *slash commands*.
 * `/info`: Displays information about this bot.
-* `/ping`: Checks the bot's latency and Discord API latency.
+* `/ping`: Checks the bot's latency and `API Discord` latency.
 * `/avatar [user] [type]`: View a user's global or server avatar.
 * `/banner [user] [type]`: View a user's global or server banner.
 * `/userinfo [user]`: Displays detailed information about a Discord user.
@@ -118,13 +118,13 @@ Everyday helper commands:
 Commands for maintaining server order (requires permissions):
 
 * `/ban <user> [time] [reason]`: Bans a user from the server (can be temporary).
-* `/unban <user_id>`: Revokes a user's ban based on their ID.
+* `/unban <user_id>`: Revokes a user's ban based on ID.
 * `/kick <user> [reason]`: Kicks a user from the server.
 * `/mute <user> [time] [reason]`: Prevents a user from sending messages (temporary or permanent).
 * `/unmute <user>`: Revokes a user's muted status.
 * `/timeout <user> <duration> [reason]`: Gives a user a timeout (cannot interact) for a specified duration.
 * `/untimeout <user>`: Revokes a user's timeout status.
-* `/clean-message <amount>`: Deletes a specified number of recent messages in the channel (requires Administrator permission).
+* `/clean-message <amount>`: Deletes a specified number of recent messages in the channel (requires `Administrator` permission).
 
 ### 🔒 Developer Commands (Slash Command)
 
@@ -132,23 +132,25 @@ Only for users whose IDs are listed in the `.env` file:
 
 * `/restart`: Restarts the bot.
 * `/say <message> [reply_to]`: Sends a message as the bot, can reply to another message.
-* `/set status <type> <message> <duration>`: Sets the bot's online status (Online, Idle, DND, Invisible) and custom message.
-* `/set activity <type> <message> <duration>`: Sets the bot's activity (Playing, Listening, Watching, Streaming).
+* `/set status <type> <message> <duration>`: Sets the bot's online status (`Online, Idle, DND, Invisible`) and custom message.
+* `/set activity <type> <message> <duration>`: Sets the bot's activity (`Playing, Listening, Watching, Streaming`).
 * `/toggleembed <option>`: Enables or disables the automatic embed detection system.
 
 ---
 
-Congratulations, the bot is ready! If you find any bugs or have suggestions, feel free to report them to this repository.
+Congratulations, the bot is *not* ready! If you find any bugs or have suggestions, feel free to `report` them to this `repository`.
 
 ```
 This section covers:
 * Clear installation steps.
 * Detailed explanation of the required `.env` configuration.
 * How to run the bot.
-* Summary of main features categorized (Downloader, AI, Utilities, Moderation, Developer).
-* Usage examples for prefix commands.
-* Use of markdown and emojis to make it visually appealing.
+* Summary of main features categorized (`Downloader, AI, Embed, Utilitas, Moderasi, Developer`).
+* Usage examples for `prefix` commands.
+* Use of `markdown` and `emoji` to make it visually appealing.
 ```
+
+Semoga kali ini sesuai dengan yang Anda maksudkan!
 
 gajelas, tutup aja nih commit
 
