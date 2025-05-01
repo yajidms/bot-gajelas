@@ -5,7 +5,7 @@ Welcome to the Furina bot source. This bot is ready to destroy your server with 
 
 ## 📋 Prerequisites
 
-Make sure you have VS Code or VS Codium installed (NEOVIM IS NOT SUPPORTED):
+Make sure you have VS Code or VS Codium installed (DOES NOT ACCEPT NEOVIM):
 
 * **Node.js:** (Version 21 or later is recommended)
 * **npm** or **yarn:** Node.js package manager
