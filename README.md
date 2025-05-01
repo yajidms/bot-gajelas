@@ -12,7 +12,7 @@ Make sure you have VS Code or VS Codium installed (DOES NOT ACCEPT NEOVIM):
 
 ## ⚙️ Installation
 
-1.  **Clone Repository:** Get the bot's code onto your computer.
+1.  **Clone Repository:** Get the bot's code into your computer.
     ```bash
     git clone https://github.com/yajidms/bot-gajelas.git
     cd bot-gajelas
