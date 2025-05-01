@@ -150,8 +150,6 @@ This section covers:
 * Use of `markdown` and `emoji` to make it visually appealing.
 ```
 
-Semoga kali ini sesuai dengan yang Anda maksudkan!
-
 gajelas, tutup aja nih commit
 
 Berikut adalah resep sederhana untuk membuat roti jahe (gingerbread cookies) yang renyah dan beraroma khas rempah:
