@@ -1,168 +1,153 @@
-# Cara Menggunakan Source Bot Furina
+# How to Use Furina Source Bot
 
-Selamat datang di source bot Furina. Bot ini siap menghancurkan server Anda dengan berbagai fitur gajelas. Ikuti langkah-langkah ini untuk memulai:
-[bagi yang mau menggunakan bot ini](https://discord.com/oauth2/authorize?client_id=1351007630092668988&permissions=8&integration_type=0&scope=bot)
+Welcome to the Furina bot source. This bot is ready to destroy your server with a variety of *gajelas* (nonsensical/random) features. Follow these steps to get started:
+[For those who want to use this Furina bot, click this blue text or link](https://discord.com/oauth2/authorize?client_id=1351007630092668988&permissions=8&integration_type=0&scope=bot)
 
-## 📋 Prasyarat
+## 📋 Prerequisites
 
-Pastikan Anda memiliki VS Code Atau VSCodium (TIDAK MENERIMA NEOVIM) terinstal:
+Make sure you have VS Code or VS Codium installed (NEOVIM IS NOT SUPPORTED):
 
-* **Node.js:** (Versi 18 atau lebih baru direkomendasikan)
-* **npm** atau **yarn:** Manajer paket Node.js
+* **Node.js:** (Version 21 or later is recommended)
+* **npm** or **yarn:** Node.js package manager
 
-## ⚙️ Instalasi
+## ⚙️ Installation
 
-1.  **Clone Repositori:** Dapatkan kode bot ke komputer Anda.
+1.  **Clone Repository:** Get the bot's code onto your computer.
     ```bash
-    git clone <https://github.com/yajidms/bot-gajelas.git>
+    git clone https://github.com/yajidms/bot-gajelas.git
     cd bot-gajelas
     ```
-2.  **Instal Dependensi:** Pasang semua paket yang dibutuhkan bot.
+2.  **Install Dependencies:** Install all the packages the bot requires.
     ```bash
     npm install
-    # atau jika menggunakan yarn
-    # yarn install
+    # or if using yarn
+    yarn install
     ```
 
-## 🔑 Konfigurasi Penting (`.env`)
+## 🔑 Important Configuration (`.env`)
 
-Buat file bernama `.env` di direktori utama proyek dengan isi API Key dan ID Bot dan ID User. Ini adalah kunci agar bot berfungsi dengan baik!
+Create a file named `.env` in the project's root directory containing the API Keys, Bot ID, and User IDs. This is crucial for the bot to function correctly!
 
 ```dotenv
-# --- Kredensial Utama ---
+# --- Key Credentials ---
 DISCORD_TOKEN=
 CLIENT_ID=
 
-# --- API Keys (Penting untuk Fitur AI & Downloader) ---
+# --- API Keys (Important for AI & Downloader Features) ---
 # Gemini
 GEMINI_API_KEY=
 
-# Together AI (Untuk Llama & DeepSeek)
+# Together AI or Deepinfra (For Llama & DeepSeek)
 TOGETHER_API_KEY=
+DEEPINFRA_KEY=
 
-# EmbedEZ (Untuk embed otomatis)
-EMBED_EZ_API_KEY=
-
-# --- ID Channel & Role (Sesuaikan dengan server Anda) ---
+# --- Channel & Role IDs (Customize for your server) ---
 # Logging
 LOG_CHANNEL_ID=
 DEV_LOG_CHANNEL_ID=
 
 # Role
 MUTED_ROLE_ID=
+# Developer IDs (Separate with commas if more than one)
+DEV_ID=ID1,ID2
 
-# ID Developer (Pisahkan dengan koma jika lebih dari satu)
-DEV_ID=ID
-
-# ID Guild (Server) tempat bot aktif (Pisahkan dengan koma jika lebih dari satu)
+# Guild (Server) IDs where the bot is active (Separate with commas if more than one)
 GUILD_ID=
 ```
 
-**Penting:** Jangan pernah membagikan file `.env` atau token bot Anda kepada siapa pun!
+**Important:** Never share your `.env` file or bot token with anyone!
 
-## ▶️ Menjalankan Bot
+## ▶️ Running the Bot
 
-Setelah konfigurasi selesai, jalankan bot dengan perintah:
+Once the configuration is complete, run the bot using the command:
 
 ```bash
 npm start
-# atau
+# or
 node index.js
 ```
 
-Bot akan online dan siap menerima perintah!
+The bot will go online and be ready to receive commands!
 
-## ✨ Fitur & Perintah Utama
+## ✨ Main Features & Commands
 
-Bot ini dilengkapi dengan berbagai perintah, baik melalui *prefix* maupun *slash command* (`/`).
+This bot comes with various commands, accessible via both *prefix* and *slash commands* (`/`).
 
-### 📥 Downloader Media (Prefix Command)
+### 📥 Media Downloader (Prefix Command)
 
-Gunakan prefix `f.` diikuti dengan URL untuk mengunduh media:
+Use the prefix `f.` followed by the URL to download media:
 
-* `f.ig <URL Instagram Reel>`: Unduh video dari Instagram Reels.
-* `f.fb <URL Video Facebook>`: Unduh video dari Facebook.
-* `f.tt <URL Video TikTok>`: Unduh video dari TikTok.
-* `f.yt <URL Video YouTube>`: Unduh video dari YouTube (kualitas 480p).
-* `f.x <URL Video Twitter/X>`: Unduh video dari Twitter/X.
+* `f.ig <Instagram Reel URL>`: Download videos from Instagram Reels.
+* `f.fb <Facebook Video URL>`: Download videos from Facebook.
+* `f.tt <TikTok Video URL>`: Download videos from TikTok.
+* `f.yt <YouTube Video URL>`: Download videos from YouTube (480p quality).
+* `f.x <Twitter/X Video URL>`: Download videos from Twitter/X.
 
-*Contoh:* `f.ig https://www.instagram.com/reel/contoh123/`
+*Example:* `f.ig https://www.instagram.com/reel/example123/`
 
-### 🧠 Fitur AI (Prefix & Slash Command)
+### 🧠 AI Features (Prefix & Slash Command)
 
-Berinteraksi dengan model AI canggih:
+Interact with advanced AI models:
 
 * **Prefix Command:**
-    * `f.geminipro <pertanyaan>`: Tanya Gemini Pro.
-    * `f.geminiflash <pertanyaan>`: Tanya Gemini Flash.
-    * `f.llama <pertanyaan>`: Tanya Llama.
-    * `f.deepseek-r1 <pertanyaan>`: Tanya DeepSeek R1.
-    * *(Anda juga bisa melampirkan file (txt, pdf, docx, xlsx, pptx, gambar) saat menggunakan perintah ini!)*
+    * `f.geminipro <question>`: Ask Gemini Pro.
+    * `f.geminiflash <question>`: Ask Gemini Flash.
+    * `f.llama <question>`: Ask Llama.
+    * `f.deepseek-r1 <question>`: Ask DeepSeek R1.
+    * *(You can also attach files (txt, pdf, docx, xlsx, pptx, images) when using these commands!)*
 * **Slash Command:**
-    * `/aichat [initial_prompt] [file]`: Memulai sesi chat interaktif dengan Gemini 2.5 Flash di dalam *thread* forum. Lampirkan file jika perlu.
-    * `/aichat_end`: Mengakhiri sesi `/aichat` yang sedang aktif di *thread*.
+    * `/aichat [initial_prompt] [file]`: Start an interactive chat session with Gemini 2.5 Flash within a forum *thread*. Attach files if needed.
+    * `/aichat_end`: Ends the currently active `/aichat` session in the *thread*.
 
-### 🔗 Embed Otomatis
+### 🛠️ Utilities (Slash Command)
 
-Bot secara otomatis mendeteksi link dari:
+Everyday helper commands:
 
-* Instagram
-* TikTok
-* X (Twitter)
-* Reddit
-* iFunny
+* `/help`: Displays a list of all available *slash commands*.
+* `/info`: Displays information about this bot.
+* `/ping`: Checks the bot's latency and Discord API latency.
+* `/avatar [user] [type]`: View a user's global or server avatar.
+* `/banner [user] [type]`: View a user's global or server banner.
+* `/userinfo [user]`: Displays detailed information about a Discord user.
+* `/serverinfo`: Displays detailed information about the current server.
+* `/list-roles`: Displays a list of all roles on the server.
+* `/adzan [city]`: Displays prayer times for a specific city in Indonesia.
 
-dan mengubahnya menjadi embed yang lebih menarik menggunakan layanan EmbedEZ. Fitur ini dapat diaktifkan/dinonaktifkan oleh developer menggunakan `/toggleembed`.
+### 🛡️ Moderation (Slash Command)
 
-### 🛠️ Utilitas (Slash Command)
+Commands for maintaining server order (requires permissions):
 
-Perintah bantu sehari-hari:
+* `/ban <user> [time] [reason]`: Bans a user from the server (can be temporary).
+* `/unban <user_id>`: Revokes a user's ban based on their ID.
+* `/kick <user> [reason]`: Kicks a user from the server.
+* `/mute <user> [time] [reason]`: Prevents a user from sending messages (temporary or permanent).
+* `/unmute <user>`: Revokes a user's muted status.
+* `/timeout <user> <duration> [reason]`: Gives a user a timeout (cannot interact) for a specified duration.
+* `/untimeout <user>`: Revokes a user's timeout status.
+* `/clean-message <amount>`: Deletes a specified number of recent messages in the channel (requires Administrator permission).
 
-* `/help`: Menampilkan daftar semua *slash command* yang tersedia.
-* `/info`: Menampilkan informasi tentang bot ini.
-* `/ping`: Mengecek latensi bot dan API Discord.
-* `/avatar [user] [type]`: Melihat avatar global atau server pengguna.
-* `/banner [user] [type]`: Melihat banner global atau server pengguna.
-* `/userinfo [user]`: Menampilkan informasi detail tentang pengguna Discord.
-* `/serverinfo`: Menampilkan informasi detail tentang server saat ini.
-* `/list-roles`: Menampilkan daftar semua role di server.
-* `/adzan [city]`: Menampilkan jadwal sholat untuk kota tertentu di Indonesia.
+### 🔒 Developer Commands (Slash Command)
 
-### 🛡️ Moderasi (Slash Command)
+Only for users whose IDs are listed in the `.env` file:
 
-Perintah untuk menjaga ketertiban server (membutuhkan izin):
-
-* `/ban <user> [waktu] [alasan]`: Melarang pengguna masuk server (bisa temporer).
-* `/unban <user_id>`: Mencabut larangan pengguna berdasarkan ID.
-* `/kick <user> [alasan]`: Mengeluarkan pengguna dari server.
-* `/mute <user> [waktu] [alasan]`: Mencegah pengguna mengirim pesan (temporer atau permanen).
-* `/unmute <user>`: Mencabut status mute pengguna.
-* `/timeout <user> <duration> [reason]`: Memberikan timeout (tidak bisa berinteraksi) kepada pengguna untuk durasi tertentu.
-* `/untimeout <user>`: Mencabut status timeout pengguna.
-* `/clean-message <amount>`: Menghapus sejumlah pesan terakhir di channel (membutuhkan izin Administrator).
-
-### 🔒 Perintah Developer (Slash Command)
-
-Hanya untuk pengguna dengan ID yang terdaftar di `.env`:
-
-* `/restart`: Merestart bot.
-* `/say <message> [reply_to]`: Mengirim pesan sebagai bot, bisa membalas pesan lain.
-* `/set status <type> <message> <duration>`: Mengatur status online bot (Online, Idle, DND, Invisible) dan pesan custom.
-* `/set activity <type> <message> <duration>`: Mengatur aktivitas bot (Playing, Listening, Watching, Streaming).
-* `/toggleembed <opsi>`: Mengaktifkan atau menonaktifkan sistem deteksi embed otomatis.
+* `/restart`: Restarts the bot.
+* `/say <message> [reply_to]`: Sends a message as the bot, can reply to another message.
+* `/set status <type> <message> <duration>`: Sets the bot's online status (Online, Idle, DND, Invisible) and custom message.
+* `/set activity <type> <message> <duration>`: Sets the bot's activity (Playing, Listening, Watching, Streaming).
+* `/toggleembed <option>`: Enables or disables the automatic embed detection system.
 
 ---
 
-Selamat botnya gk jadi ! Jika Anda menemukan bug atau memiliki saran, jangan ragu untuk report nih repository.
+Congratulations, the bot is ready! If you find any bugs or have suggestions, feel free to report them to this repository.
 
 ```
-Bagian ini mencakup:
-* Langkah instalasi yang jelas.
-* Penjelasan detail tentang konfigurasi `.env` yang diperlukan.
-* Cara menjalankan bot.
-* Ringkasan fitur utama yang dikategorikan (Downloader, AI, Embed, Utilitas, Moderasi, Developer).
-* Contoh penggunaan untuk perintah prefix.
-* Penggunaan markdown dan emoji untuk membuatnya lebih menarik secara visual.
+This section covers:
+* Clear installation steps.
+* Detailed explanation of the required `.env` configuration.
+* How to run the bot.
+* Summary of main features categorized (Downloader, AI, Utilities, Moderation, Developer).
+* Usage examples for prefix commands.
+* Use of markdown and emojis to make it visually appealing.
 ```
 
 gajelas, tutup aja nih commit
