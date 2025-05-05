@@ -1,7 +1,7 @@
 # How to Use Furina Source Bot
 
 Welcome to the Furina bot source. This bot is ready to destroy your server with a variety of gajelas (unclear) features. Follow these steps to get started:
-[for those who want to use this bot Furina, take this blue text or link](https://discord.com/oauth2/authorize?client_id=1368788978223812689&permissions=8&integration_type=0&scope=bot)
+[for those who want to use this bot Furina, take this blue text or link](https://discord.com/oauth2/authorize?client_id=1368819487880642641&permissions=8&integration_type=0&scope=bot)
 
 ## 📋 Prerequisites
 
