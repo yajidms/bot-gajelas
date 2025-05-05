@@ -67,8 +67,6 @@ npm start
 node index.js
 ```
 
-The bot will go online and be ready to receive commands!
-
 ## ✨ Main Features & Commands
 
 This bot comes with various commands, accessible via both `prefix` and `slash command` (`/`).
