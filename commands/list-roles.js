@@ -21,7 +21,6 @@ module.exports = {
       ? roles.map(role => `<@&${role.id}>`).join(', ')
       : 'Tidak ada role selain @everyone';
 
-    // 3. Buat embed
     const rolesEmbed = new EmbedBuilder()
       .setColor('#FF0000')
       .setTitle(`Daftar Role di ${interaction.guild.name}`)
