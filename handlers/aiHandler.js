@@ -242,8 +242,8 @@ async function handleGeminiResponse(
     try {
       const usedModel = getGeminiModel(
         modelName.includes("Flash")
-          ? "gemini-2.5-flash-preview-04-17"
-          : "gemini-2.5-pro-exp-03-25"
+          ? "gemini-2.5-flash"
+          : "gemini-2.5-pro"
       );
       const response = await usedModel.generateContent(prompt);
       let answer = response.response.text();

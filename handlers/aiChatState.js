@@ -36,7 +36,7 @@ function switchGeminiKey() {
 }
 
 const GEMINI_MODEL_NAME = "Gemini 2.5 Flash";
-const GEMINI_INTERNAL_ID = "gemini-2.5-flash-preview-04-17";
+const GEMINI_INTERNAL_ID = "gemini-2.5-flash";
 
 /**
  * @param {string} modelTypeIndicator

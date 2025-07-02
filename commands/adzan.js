@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 const axios = require("axios");
 
 module.exports = {
@@ -16,7 +16,7 @@ module.exports = {
     if (!interaction.inGuild()) {
       await interaction.reply({
         content: "You can only run this command inside the server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -70,7 +70,7 @@ module.exports = {
       console.error(error);
       await interaction.reply({
         content: `Failed to take the adzan schedule for ${city}. Make sure the city name is correct.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

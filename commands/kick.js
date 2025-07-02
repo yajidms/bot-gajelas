@@ -1,15 +1,15 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { PermissionsBitField } = require("discord.js");
+const { PermissionsBitField, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("kick")
-    .setDescription("Kicks a user from the server.") // Mengeluarkan pengguna dari server.
+    .setDescription("Kicks a user from the server.")
     .addUserOption((option) =>
       option
         .setName("user")
-        .setDescription("The user to be kicked.") // Pengguna yang akan dikeluarkan.
+        .setDescription("The user to be kicked.")
         .setRequired(true)
     )
     .addStringOption((option) =>
@@ -18,29 +18,29 @@ module.exports = {
         .setDescription("Reason for the kick.") // Alasan kick.
         .setRequired(false)
     )
-    .setDefaultPermission(true), // Tampilkan command untuk semua pengguna -> Show command for all users
+    .setDefaultPermission(true),
 
   async execute(interaction) {
-    // Periksa izin pengguna -> Check user permissions
+    // Check user permissions
     if (
       !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
     ) {
       return interaction.reply({
         content: "You do not have permission to use this command.",
-        ephemeral: true,
-      }); // Kamu tidak memiliki izin untuk menggunakan perintah ini.
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
     const user = interaction.options.getUser("user");
     const reason =
-      interaction.options.getString("alasan") || "No reason provided."; // Tidak ada alasan yang diberikan.
+      interaction.options.getString("alasan") || "No reason provided.";
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member) {
       return interaction.reply({
         content: "User not found in this server.",
-        ephemeral: true,
-      }); // Pengguna tidak ditemukan di server ini.
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
     try {
@@ -51,10 +51,10 @@ module.exports = {
           icon_url: user.displayAvatarURL(),
         },
         title: "User Kicked", // User Kicked
-        description: `${user.tag} has been kicked!`, // ${user.tag} telah dikeluarkan!
+        description: `${user.tag} has been kicked!`,
         fields: [
-          { name: "User ID", value: user.id, inline: true }, // ID User
-          { name: "Reason", value: reason, inline: true }, // Alasan
+          { name: "User ID", value: user.id, inline: true },
+          { name: "Reason", value: reason, inline: true },
         ],
         userId: user.id,
         timestamp: Date.now(),
@@ -63,13 +63,13 @@ module.exports = {
 
       interaction.reply({
         content: `**${user.tag}** successfully kicked. Reason: ${reason}`,
-      }); // **${user.tag}** berhasil dikeluarkan. Alasan: ${reason}
+      });
     } catch (error) {
-      console.error("Error while kicking:", error); // Error saat melakukan kick:
+      console.error("Error while kicking:", error);
       return interaction.reply({
         content: "An error occurred while trying to kick the user.",
-        ephemeral: true,
-      }); // Terjadi kesalahan saat mencoba mengeluarkan pengguna.
+        flags: MessageFlags.Ephemeral,
+      });
     }
   },
 };

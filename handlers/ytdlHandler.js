@@ -8,7 +8,7 @@ async function getFileSize(url) {
       .get(url, { method: "HEAD" }, (res) => {
         const length = res.headers["content-length"];
         if (length) resolve(parseInt(length));
-        else reject(new Error("Tidak bisa mendapatkan ukuran file"));
+        else reject(new Error("Can't get the file size"));
       })
       .on("error", reject);
   });
@@ -22,7 +22,7 @@ async function handleYtDownload(message) {
   const urlPattern = /https?:\/\/\S+/;
   if (!args[0] || !urlPattern.test(args[0])) {
     return message.reply(
-      "Masukkan URL YouTube yang valid!\nContoh: `f.yt https://youtube.com/...`"
+      "Enter a valid YouTube URL!\nExample: `f.yt https://youtube.com/...`"
     );
   }
 
@@ -41,10 +41,10 @@ async function handleYtDownload(message) {
     });
     const data = response.data;
 
-    const text = `**dari :** <@${message.author.id}>\n\n**YouTube**
-**Judul:** ${data.title || "-"}
+    const text = `**from :** <@${message.author.id}>\n\n**YouTube**
+**Title:** ${data.title || "-"}
 **Author:** ${data.author || "-"}
-**Deskripsi:** ${data.description || "-"}`;
+**Description:** ${data.description || "-"}`;
 
     let fileSizeLimit = 100 * 1024 * 1024;
     let fileSize = 0;
@@ -83,7 +83,7 @@ async function handleYtDownload(message) {
     }
   } catch (e) {
     console.error(e);
-    message.channel.send(`Terjadi error: ${e.message}`);
+    message.channel.send(`An error occurred: ${e.message}`);
   }
 }
 

@@ -7,7 +7,7 @@ async function getFileSize(url) {
     let response = await axios.head(url);
     return parseInt(response.headers["content-length"], 10);
   } catch (error) {
-    console.error("Gagal mendapatkan ukuran file:", error);
+    console.error("Failed to get the file size:", error);
     return Infinity; // Kembalikan ukuran besar jika gagal
   }
 }
@@ -21,7 +21,7 @@ async function handleX(msg) {
     // Tambahkan pengecekan tutor di sini
     if (!args[1] || !urlPattern.test(args[1])) {
       return msg.reply(
-        "Masukkan URL Video Twitter/X yang valid!\nContoh: `f.x https://twitter.com/...`"
+        "Enter a valid Twitter/X Video URL!\nExample: `f.x https://x.com/...`"
       );
     }
 
@@ -72,12 +72,12 @@ async function handleX(msg) {
           msg.channel.send(`[${messageContent || "_"}](${modifiedUrl})`);
         } else {
           console.error(e);
-          msg.channel.send(`Error, coba lagi!.`);
+          msg.channel.send(`Failed to download the video`);
         }
       }
     } catch (e) {
       console.error(e);
-      msg.channel.send(`Error, coba lagi!.`);
+      msg.channel.send(`Failed to download the video`);
     }
   }
 }

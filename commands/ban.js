@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { PermissionsBitField } = require("discord.js");
+const { PermissionsBitField, MessageFlags } = require("discord.js");
 const ms = require("ms");
 const { sendLog } = require("../handlers/logHandler"); // Pastikan logHandler sudah diimport
 
@@ -33,7 +33,7 @@ module.exports = {
     ) {
       return interaction.reply({
         content: "You do not have permission to use this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }); // Kamu tidak memiliki izin untuk menggunakan perintah ini.
     }
 
@@ -46,7 +46,7 @@ module.exports = {
     if (!member) {
       return interaction.reply({
         content: "User not found in this server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }); // Pengguna tidak ditemukan di server ini.
     }
 
@@ -89,7 +89,7 @@ module.exports = {
       console.error("Error while banning:", error); // Error saat melakukan ban:
       return interaction.reply({
         content: "An error occurred while trying to ban the user.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }); // Terjadi kesalahan saat mencoba mem-ban pengguna.
     }
   },
