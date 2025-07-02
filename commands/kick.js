@@ -5,7 +5,7 @@ const { sendLog } = require("../handlers/logHandler");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("kick")
-    .setDescription("Kicks a user from the server.")
+    .setDescription("Kicks a user from the server.") // Mengeluarkan pengguna dari server.
     .addUserOption((option) =>
       option
         .setName("user")
