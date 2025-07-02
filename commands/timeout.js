@@ -22,7 +22,7 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("reason")
-        .setDescription("Timeout reason.") // Description in English
+        .setDescription("Timeout reason.")
         .setRequired(false)
     ),
 
