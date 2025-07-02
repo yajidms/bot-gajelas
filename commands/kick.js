@@ -5,7 +5,7 @@ const { sendLog } = require("../handlers/logHandler");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("kick")
-    .setDescription("Kicks a user from the server.") // Mengeluarkan pengguna dari server.
+    .setDescription("Kicks a user from the server.")
     .addUserOption((option) =>
       option
         .setName("user")
@@ -15,7 +15,7 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("alasan")
-        .setDescription("Reason for the kick.") // Alasan kick.
+        .setDescription("Reason for the kick.")
         .setRequired(false)
     )
     .setDefaultPermission(true),
@@ -50,7 +50,7 @@ module.exports = {
           name: user.tag,
           icon_url: user.displayAvatarURL(),
         },
-        title: "User Kicked", // User Kicked
+        title: "User Kicked",
         description: `${user.tag} has been kicked!`,
         fields: [
           { name: "User ID", value: user.id, inline: true },
