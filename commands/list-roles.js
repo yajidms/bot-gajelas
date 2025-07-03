@@ -7,16 +7,14 @@ module.exports = {
     .setDMPermission(false),
 
   async execute(interaction) {
-    // 1. Ambil dan urutkan roles
     const roles = interaction.guild.roles.cache
       .sort((a, b) => b.position - a.position)
       .filter(role => 
         role.name !== '@everyone' && 
         !role.managed &&
-        role.id !== interaction.guild.id // Filter @everyone dan managed roles
+        role.id !== interaction.guild.id
       );
 
-    // 2. Format daftar roles
     const roleList = roles.size > 0
       ? roles.map(role => `<@&${role.id}>`).join(', ')
       : 'Tidak ada role selain @everyone';
@@ -27,7 +25,6 @@ module.exports = {
       .setDescription(roleList)
       .setFooter({ text: `Total: ${roles.size} roles` });
 
-    // 4. Kirim response
     await interaction.reply({ embeds: [rolesEmbed] });
   },
 };

@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   EmbedBuilder,
   ChannelType,
+  MessageFlags,
 } = require("discord.js");
 
 module.exports = {
@@ -13,8 +14,8 @@ module.exports = {
   async execute(interaction) {
     if (!interaction.inGuild()) {
       return interaction.reply({
-        content: "This command can only be used within a server", // Command ini hanya bisa digunakan di dalam server
-        ephemeral: true,
+        content: "This command can only be used within a server",
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -82,8 +83,8 @@ module.exports = {
     } catch (error) {
       console.error("Error serverinfo command:", error);
       await interaction.reply({
-        content: "Failed to retrieve server information", // Gagal mengambil informasi server
-        ephemeral: true,
+        content: "Failed to retrieve server information",
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 module.exports = {
@@ -20,7 +20,7 @@ module.exports = {
     ) {
       return interaction.reply({
         content: "You do not have permission to use this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }); // English: You do not have permission to use this command.
     }
 
@@ -29,15 +29,15 @@ module.exports = {
 
     if (!guildMember) {
       return interaction.reply({
-        content: `User **${user.tag}** not found on the server.`, // English: User **${user.tag}** not found on the server.
-        ephemeral: true,
+        content: `User **${user.tag}** not found on the server.`,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
     if (!guildMember.isCommunicationDisabled()) {
       return interaction.reply({
-        content: `User **${user.tag}** is not currently in timeout.`, // English: User **${user.tag}** is not currently in timeout.
-        ephemeral: true,
+        content: `User **${user.tag}** is not currently in timeout.`,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -70,8 +70,8 @@ module.exports = {
     } catch (error) {
       console.error("Error saat untimeout:", error); // English: Error while untimeout:
       await interaction.reply({
-        content: `An error occurred while trying to untimeout user **${user.tag}**.`, // English: An error occurred while trying to untimeout user **${user.tag}**.
-        ephemeral: true,
+        content: `An error occurred while trying to untimeout user **${user.tag}**.`,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

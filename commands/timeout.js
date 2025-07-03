@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { PermissionsBitField } = require("discord.js");
+const { PermissionsBitField, MessageFlags } = require("discord.js");
 const ms = require("ms");
 const { sendLog } = require("../handlers/logHandler"); // Ensure logHandler is imported
 
@@ -22,7 +22,7 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("reason")
-        .setDescription("Timeout reason.")
+        .setDescription("Timeout reason.") // Description in English
         .setRequired(false)
     ),
 
@@ -35,7 +35,7 @@ module.exports = {
     ) {
       return interaction.reply({
         content: "You do not have permission to use this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -48,7 +48,7 @@ module.exports = {
     if (!member) {
       return interaction.reply({
         content: "User not found in this server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -82,7 +82,7 @@ module.exports = {
       console.error("Error during timeout:", error); // Error message in English
       return interaction.reply({
         content: "An error occurred while trying to timeout the user.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }); // Error message in English
     }
   },

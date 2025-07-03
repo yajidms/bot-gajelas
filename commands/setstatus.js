@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ActivityType } = require("discord.js");
+const { SlashCommandBuilder, ActivityType, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 const DEVELOPER_IDS = process.env.DEV_ID
@@ -8,11 +8,13 @@ const DEVELOPER_IDS = process.env.DEV_ID
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("set")
-    .setDescription("Manage bot settings")
+    .setDescription("[Developer Only] Manage bot settings")
     .addSubcommand((subcommand) =>
       subcommand
         .setName("status")
-        .setDescription("Set temporary or permanent bot status")
+        .setDescription(
+          "[Developer Only] Set temporary or permanent bot status"
+        )
         .addStringOption((option) =>
           option
             .setName("type")
@@ -48,7 +50,9 @@ module.exports = {
     .addSubcommand((subcommand) =>
       subcommand
         .setName("activity")
-        .setDescription("Set temporary or permanent bot activity")
+        .setDescription(
+          "[Developer Only] Set temporary or permanent bot activity"
+        )
         .addStringOption((option) =>
           option
             .setName("type")
@@ -89,7 +93,7 @@ module.exports = {
       return interaction.reply({
         content:
           "🚫 **System Restricted**\nThis command requires developer privileges",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -131,7 +135,7 @@ module.exports = {
           content: `✅ Bot status successfully set to **${type}** with custom status: **"${message}"** for **${getReadableDuration(
             duration
           )}**`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
@@ -185,7 +189,7 @@ module.exports = {
           content: `✅ Bot activity successfully set to **${activity.toLowerCase()}** for **${getReadableDuration(
             duration
           )}** with message **"${message}"**`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
@@ -231,7 +235,7 @@ module.exports = {
       });
       await interaction.reply({
         content: "❌ **System Update Failed**\nCheck console for details",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

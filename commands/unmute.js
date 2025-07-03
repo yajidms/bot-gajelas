@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 module.exports = {
@@ -19,8 +19,8 @@ module.exports = {
       !interaction.member.permissions.has(PermissionFlagsBits.Administrator)
     ) {
       return interaction.reply({
-        content: "You don't have permission to use this command.", // English: You don't have permission to use this command.
-        ephemeral: true,
+        content: "You don't have permission to use this command.",
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -30,15 +30,15 @@ module.exports = {
 
     if (!guildMember) {
       return interaction.reply({
-        content: `User **${user.tag}** not found on the server.`, // English: User **${user.tag}** not found on the server.
-        ephemeral: true,
+        content: `User **${user.tag}** not found on the server.`,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
     if (!guildMember.roles.cache.has(mutedRoleId)) {
       return interaction.reply({
-        content: `User **${user.tag}** is not currently muted.`, // English: User **${user.tag}** is not currently muted.
-        ephemeral: true,
+        content: `User **${user.tag}** is not currently muted.`,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -71,8 +71,8 @@ module.exports = {
     } catch (error) {
       console.error("Error saat unmute:", error);
       await interaction.reply({
-        content: `An error occurred while trying to unmute user **${user.tag}**.`, // English: An error occurred while trying to unmute user **${user.tag}**.
-        ephemeral: true,
+        content: `An error occurred while trying to unmute user **${user.tag}**.`,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

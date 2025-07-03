@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
     ) {
       return interaction.reply({
         content: "You do not have permission to use this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }); // Pesan dalam bahasa Inggris
     }
 
@@ -31,8 +31,8 @@ module.exports = {
 
       if (!isBanned) {
         return interaction.reply({
-          content: `User with ID **${userId}** was not found in the ban list.`, // Pesan dalam bahasa Inggris
-          ephemeral: true,
+          content: `User with ID **${userId}** was not found in the ban list.`,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -63,8 +63,8 @@ module.exports = {
     } catch (error) {
       console.error("Error saat membuka ban:", error);
       await interaction.reply({
-        content: `An error occurred while trying to unban. Make sure the user ID is valid and the user is actually banned.`, // Pesan dalam bahasa Inggris
-        ephemeral: true,
+        content: `An error occurred while trying to unban. Make sure the user ID is valid and the user is actually banned.`,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

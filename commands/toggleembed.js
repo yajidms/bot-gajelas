@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 const DEVELOPER_IDS = process.env.DEV_ID
@@ -24,8 +24,8 @@ module.exports = {
     if (!DEVELOPER_IDS.includes(interaction.user.id)) {
       return interaction.reply({
         content:
-          "🚫 **Developer Access Required**\nThis command is for the development team only!", // 🚫 **Akses Developer Diperlukan**\nPerintah ini hanya untuk tim pengembang!
-        ephemeral: true,
+          "🚫 **Developer Access Required**\nThis command is for the development team only!",
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -40,8 +40,8 @@ module.exports = {
         return interaction.reply({
           content: `⚠️ Embed detection system is already **${
             currentStatus ? "active" : "inactive"
-          }**`, // ⚠️ Sistem deteksi embed sudah **${currentStatus ? "aktif" : "nonaktif"}**
-          ephemeral: true,
+          }**`,
+          flags: MessageFlags.Ephemeral,
         });
       } // Update status
 
@@ -50,8 +50,8 @@ module.exports = {
 
       const statusText = newStatus ? "**ACTIVE** 🟢" : "**INACTIVE** 🔴"; // "**AKTIF** 🟢" : "**NONAKTIF** 🔴"
       await interaction.reply({
-        content: `✅ **Embed Detection System**\nStatus: ${statusText}`, // ✅ **Sistem Deteksi Embed**\nStatus: ${statusText}
-        ephemeral: true,
+        content: `✅ **Embed Detection System**\nStatus: ${statusText}`,
+        flags: MessageFlags.Ephemeral,
       }); // Logging
 
       console.log(
@@ -81,8 +81,8 @@ module.exports = {
     } catch (error) {
       console.error("[SYSTEM ERROR] Failed to update embed detection:", error); // "[SYSTEM ERROR] Gagal update deteksi embed:"
       await interaction.reply({
-        content: "❌ **System Update Failed**\nAn internal error occurred!", // "❌ **Gagal Update Sistem**\nTerjadi kesalahan internal!"
-        ephemeral: true,
+        content: "❌ **System Update Failed**\nAn internal error occurred!",
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

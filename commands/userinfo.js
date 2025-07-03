@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -15,8 +15,8 @@ module.exports = {
   async execute(interaction) {
     if (!interaction.inGuild()) {
       return interaction.reply({
-        content: "❌ This command can only be used within a server", // ❌ Command ini hanya bisa digunakan di dalam server
-        ephemeral: true,
+        content: "❌ This command can only be used within a server",
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -28,8 +28,8 @@ module.exports = {
 
       if (!member) {
         return interaction.reply({
-          content: "⚠️ User not found in this server", // ⚠️ Pengguna tidak ditemukan di server ini
-          ephemeral: true,
+          content: "⚠️ User not found in this server",
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -72,8 +72,8 @@ module.exports = {
     } catch (error) {
       console.error("Error userinfo command:", error);
       await interaction.reply({
-        content: "❌ Failed to retrieve user information", // ❌ Gagal mengambil informasi pengguna
-        ephemeral: true,
+        content: "❌ Failed to retrieve user information",
+        flags: MessageFlags.Ephemeral,
       });
     }
   },
