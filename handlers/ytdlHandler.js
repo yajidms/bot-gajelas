@@ -26,7 +26,6 @@ async function handleYtDownload(message) {
     );
   }
 
-  // Hapus pesan user
   await message.delete();
 
   const ytUrl = args[0];
@@ -58,7 +57,7 @@ async function handleYtDownload(message) {
     }
 
     if (!canSendAttachment) {
-      // File terlalu besar atau tidak diketahui ukurannya, kirim link download + thumbnail
+      // Files too large or unknown size, send download link + thumbnail
       let files = [];
       if (data.thumbnail) {
         files.push(
@@ -71,7 +70,6 @@ async function handleYtDownload(message) {
         allowedMentions: { users: [] },
       });
     } else {
-      // File cukup kecil, kirim sebagai attachment
       const attachment = new AttachmentBuilder(data.url, {
         name: "youtube.mp4",
       });

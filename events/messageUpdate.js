@@ -9,22 +9,20 @@ module.exports = {
   name: "messageUpdate",
   once: false,
   async execute(client, oldMessage, newMessage) {
-    // Batasi hanya untuk server tertentu
     if (!oldMessage.guild || !ALLOWED_GUILD_IDS.includes(oldMessage.guild.id))
       return;
 
-    // Pastikan pesan bukan dari bot dan konten pesan berubah
     if (
       !oldMessage.author ||
       oldMessage.author.bot ||
       oldMessage.content === newMessage.content
     )
       return;
-    const logChannelId = process.env.LOG_CHANNEL_ID; // Ambil ID channel log
+    const logChannelId = process.env.LOG_CHANNEL_ID;
 
-    // Membuat embed untuk pesan yang diedit
+    // Create an embed for the edited message
     const logDetails = {
-      color: 0xffcc00, // Warna embed
+      color: 0xffcc00,
       title: `message edited on https://discord.com/channels/${oldMessage.guild.id}/${oldMessage.channel.id}/${newMessage.id}`,
       description: `**before**:\n${oldMessage.content}\n\n**after**:\n${newMessage.content}`,
       author: {
@@ -36,8 +34,8 @@ module.exports = {
         text: `ID User: ${oldMessage.author.id} | ID Message: ${newMessage.id}`,
       },
       timestamp: Date.now(),
-      userId: oldMessage.author.id, // Tambahkan ID Pengguna
-      messageId: newMessage.id, // Tambahkan ID Pesan yang diedit
+      userId: oldMessage.author.id,
+      messageId: newMessage.id,
     };
 
     // Mengirim log ke channel log

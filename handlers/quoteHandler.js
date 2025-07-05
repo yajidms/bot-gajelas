@@ -28,15 +28,15 @@ async function sendQOTD(client) {
   const { quote, author } = await getQuoteOfTheDay();
   if (quote && author) {
     const embed = new EmbedBuilder()
-      .setColor(0x00ffed) // Embed color
-      .setTitle("Quote of the Day") // Embed title
-      .setDescription(`"${quote}"`) // QOTD content
-      .setFooter({ text: `- ${author}` }) // Author name in footer
-      .setTimestamp(); // Timestamp
+      .setColor(0x00ffed) 
+      .setTitle("Quote of the Day") 
+      .setDescription(`"${quote}"`) 
+      .setFooter({ text: `- ${author}` }) 
+      .setTimestamp(); 
     channel.send({ embeds: [embed] });
-    console.log("QOTD sent successfully"); // QOTD berhasil dikirim
+    console.log("QOTD sent successfully"); 
   } else {
-    console.error("Failed to get Quote of the Day"); // Gagal mendapatkan Quote of the Day
+    console.error("Failed to get Quote of the Day"); 
   }
 }
 
@@ -46,14 +46,14 @@ function scheduleQOTD(client) {
 
   cron.schedule(`${utcMinute} ${utcHour} * * *`, () => {
     sendQOTD(client);
-  }); // Format hour and minute with leading zero
+  });
 
   const formattedHour = utcHour.toString().padStart(2, "0");
   const formattedMinute = utcMinute.toString().padStart(2, "0");
 
   console.log(
     `QOTD scheduled daily at ${formattedHour}:${formattedMinute} UTC.`
-  ); // QOTD dijadwalkan setiap hari pada ${formattedHour}:${formattedMinute} UTC.
+  );
 }
 
 // Function to get QOTD for user (via command), send embed
@@ -64,11 +64,11 @@ async function getQOTDForUser() {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x00ffed) // Embed color
-    .setTitle("Quote of the Day") // Embed title
-    .setDescription(`"${quote}"`) // QOTD Content
-    .setFooter({ text: `- ${author}` }) // Author name in footer
-    .setTimestamp(); // Timestamp
+    .setColor(0x00ffed) 
+    .setTitle("Quote of the Day") 
+    .setDescription(`"${quote}"`) 
+    .setFooter({ text: `- ${author}` }) 
+    .setTimestamp(); 
   return { embeds: [embed] };
 }
 
