@@ -7,10 +7,8 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const pdfParse = require("pdf-parse");
-const mammoth = require("mammoth");
-const XLSX = require("xlsx");
-const pptx2json = require("pptx2json");
 const Tesseract = require("tesseract.js");
+const officeParser = require("officeparser");
 require("dotenv").config();
 
 const geminiKeys = [process.env.GEMINI_API_KEY];
@@ -93,8 +91,18 @@ async function readAttachment(attachment) {
     console.log(
       `[File Read] Download successful: ${name} (${response.data.length} bytes)`
     );
-    const codeExtensions = [ ".txt", ".js", ".ts", ".jsx", ".tsx", ".py", ".java", ".c", ".cpp", ".cs", ".rb", ".go", ".php", ".swift", ".kt", ".kts", ".rs", ".scala", ".sh", ".bat", ".pl", ".lua", ".r", ".m", ".vb", ".dart", ".html", ".css", ".scss", ".less", ".json", ".xml", ".yml", ".yaml", ".md", ".ini", ".cfg", ".toml", ".sql", ".asm", ".s", ".h", ".hpp", ".vue", ".coffee", ".erl", ".ex", ".exs", ".fs", ".fsx", ".groovy", ".jl", ".lisp", ".clj", ".cljs", ".ml", ".mli", ".nim", ".ps1", ".psm1", ".psd1", ".rkt", ".vb", ".vbs", ".v", ".sv", ".svelte", ".jar" ];
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
+    const codeExtensions = [ 
+      ".txt", ".js", ".ts", ".jsx", ".tsx", ".py", ".java", ".c", ".cpp", ".cs",
+      ".rb", ".go", ".php", ".swift", ".kt", ".kts", ".rs", ".scala", ".sh",
+      ".bat", ".pl", ".lua", ".r", ".m", ".vb", ".dart", ".html", ".css", ".scss",
+      ".less", ".json", ".xml", ".yml", ".yaml", ".md", ".ini", ".cfg", ".toml",
+      ".sql", ".asm", ".s", ".h", ".hpp", ".vue", ".coffee", ".erl", ".ex", ".exs",
+      ".fs", ".fsx", ".groovy", ".jl", ".lisp", ".clj", ".cljs", ".ml", ".mli",
+      ".nim", ".ps1", ".psm1", ".psd1", ".rkt", ".vb", ".vbs", ".v", ".sv", ".svelte", ".jar" 
+    ];
+    const imageExtensions = [
+    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"
+    ];
     const documentExtensions = [".pdf", ".docx", ".xlsx", ".xls", ".pptx"];
 
     let text = `[File Name: ${name}]\n`;
@@ -132,35 +140,17 @@ async function readAttachment(attachment) {
         text += "[Failed to read PDF]";
         console.error(`[File Read] PDF Error ${name}:`, e);
       }
-    } else if (name.endsWith(".docx")) {
+    } else if (name.endsWith(".docx") || name.endsWith(".doc") || 
+               name.endsWith(".xlsx") || name.endsWith(".xls") || 
+               name.endsWith(".pptx") || name.endsWith(".ppt")) {
+      // Unified Office document processing using officeparser
       try {
-        text += (await mammoth.extractRawText({ path: tempPath })).value;
-        console.log(`[File Read] ${name} read as DOCX.`);
-      } catch (e) {
-        text += "[Failed to read DOCX]";
-        console.error(`[File Read] DOCX Error ${name}:`, e);
-      }
-    } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
-      try {
-        const wb = XLSX.readFile(tempPath);
-        text += wb.SheetNames.map(
-          (sn) => `Sheet: ${sn}\n${XLSX.utils.sheet_to_csv(wb.Sheets[sn])}`
-        ).join("\n\n");
-        console.log(`[File Read] ${name} read as Excel.`);
-      } catch (e) {
-        text += "[Failed to read Excel]";
-        console.error(`[File Read] Excel Error ${name}:`, e);
-      }
-    } else if (name.endsWith(".pptx")) {
-      try {
-        const s = await pptx2json(tempPath);
-        text += s
-          .map((sl, i) => `Slide ${i + 1}:\n${sl.texts?.join("\n") ?? ""}`)
-          .join("\n\n");
-        console.log(`[File Read] ${name} read as PPTX.`);
-      } catch (e) {
-        text += "[Failed to read PPTX]";
-        console.error(`[File Read] PPTX Error ${name}:`, e);
+        const data = await officeParser.parseOfficeAsync(tempPath);
+        text += data || "[Office document processed but no text content found]";
+        console.log(`[File Read] ${name} read as Office document.`);
+      } catch (officeError) {
+        console.error(`[File Read] Office document processing error ${name}:`, officeError);
+        text += `[Failed to process Office document: ${officeError.message}]`;
       }
     } else {
       text += "[Unsupported file type]";
