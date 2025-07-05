@@ -55,7 +55,7 @@ module.exports = {
           icon_url: interaction.user.displayAvatarURL(),
         },
         title: "User Unmuted",
-        description: `User **${user.tag}** has been unmuted.`, // English: User **${user.tag}** has been unmuted.
+        description: `User **${user.tag}** has been unmuted.`,
         fields: [
           { name: "User", value: user.tag, inline: true },
           {

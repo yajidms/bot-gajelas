@@ -46,29 +46,29 @@ module.exports = {
       await guildMember.timeout(null);
       await interaction.reply({
         content: `User **${user.tag}** successfully untimed out.`,
-      }); // English: User **${user.tag}** successfully untimed out. // English: Send log
+      });
 
       const logDetails = {
         author: {
           name: interaction.user.tag,
           icon_url: interaction.user.displayAvatarURL(),
         },
-        title: "User Untimed Out", // English: User Untimed Out
-        description: `User **${user.tag}** has been untimed out.`, // English: User **${user.tag}** has been untimed out.
+        title: "User Untimed Out",
+        description: `User **${user.tag}** has been untimed out.`,
         fields: [
-          { name: "User", value: user.tag, inline: true }, // English: User
+          { name: "User", value: user.tag, inline: true },
           {
             name: "Admin who Untimed Out",
             value: `<@${interaction.user.id}>`,
             inline: true,
-          }, // English: Admin who Untimed Out
+          },
         ],
         userId: interaction.user.id,
         timestamp: Date.now(),
       };
       sendLog(interaction.client, process.env.LOG_CHANNEL_ID, logDetails);
     } catch (error) {
-      console.error("Error saat untimeout:", error); // English: Error while untimeout:
+      console.error("Error saat untimeout:", error);
       await interaction.reply({
         content: `An error occurred while trying to untimeout user **${user.tag}**.`,
         flags: MessageFlags.Ephemeral,
