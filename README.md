@@ -19,7 +19,7 @@ Make sure you have `VS Code Or VS Codium (DOES NOT ACCEPT NEOVIM)` installed:
     ```
 2.  **Install Dependencies:** Install all the packages the bot needs.
     ```bash
-    npm install
+    bun i (dont using npm)
     # or if using yarn
     yarn install
     ```
