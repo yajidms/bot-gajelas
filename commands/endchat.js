@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const { activeAIChats } = require("../handlers/aiChatState");
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
     if (!chatData || chatData.userId !== interaction.user.id) {
       await interaction.reply({
         content: "You do not have an active AI chat session in this thread.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -21,7 +21,7 @@ module.exports = {
 
     await interaction.reply({
       content: "Your AI chat session has ended. This thread will remain open for further discussion.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 };

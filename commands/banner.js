@@ -4,6 +4,7 @@ const {
   ButtonBuilder,
   ButtonStyle,
   ActionRowBuilder,
+  MessageFlags,
 } = require("discord.js");
 
 module.exports = {
@@ -93,7 +94,7 @@ module.exports = {
         if (!serverBannerInfo || !serverBannerInfo.url) {
           return interaction.reply({
             content: "❌ User doesn't have a server banner!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         handleBanner("Server", serverBannerInfo);
@@ -101,7 +102,7 @@ module.exports = {
         if (!globalBannerInfo || !globalBannerInfo.url) {
           return interaction.reply({
             content: "❌ User doesn't have a global banner!",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         handleBanner("Global", globalBannerInfo);
@@ -115,7 +116,7 @@ module.exports = {
       if (embeds.length === 0) {
         return interaction.reply({
           content: "❌ User doesn't have any banners!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -129,7 +130,7 @@ module.exports = {
       console.error("Banner command error:", error);
       await interaction.reply({
         content: "Failed to fetch banner data. Please check bot permissions!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

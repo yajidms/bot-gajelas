@@ -3,45 +3,44 @@ const { EmbedBuilder } = require("discord.js");
 module.exports = {
   sendLog: async (client, channelId, logDetails) => {
     try {
-      // Validate logDetails parameter
       if (!logDetails || typeof logDetails !== "object") {
-        console.error("logDetails is invalid or empty!"); // logDetails tidak valid atau kosong!
+        console.error("logDetails is invalid or empty!"); 
         return;
       }
 
       const logChannel = client.channels.cache.get(channelId);
       if (!logChannel) {
-        console.error(`Log channel with ID ${channelId} not found!`); // Channel log dengan ID ${channelId} tidak ditemukan!
+        console.error(`Log channel with ID ${channelId} not found!`); 
         return;
-      } // Prepare footer text
+      } 
 
       let footerText = "";
       if (logDetails.userId && logDetails.messageId) {
-        footerText = `User ID: ${logDetails.userId} | Message ID: ${logDetails.messageId}`; // ID User: ${logDetails.userId} | ID Pesan: ${logDetails.messageId}
+        footerText = `User ID: ${logDetails.userId} | Message ID: ${logDetails.messageId}`; 
       } else if (logDetails.userId) {
-        footerText = `User ID: ${logDetails.userId}`; // ID User: ${logDetails.userId}
+        footerText = `User ID: ${logDetails.userId}`; 
       } else if (logDetails.messageId) {
-        footerText = `Message ID: ${logDetails.messageId}`; // ID Pesan: ${logDetails.messageId}
-      } // Fallback default values for logDetails
+        footerText = `Message ID: ${logDetails.messageId}`; 
+      } 
 
       const embed = new EmbedBuilder()
         .setColor(logDetails.color || 0x00ffed)
         .setAuthor({
-          name: logDetails.author?.name || "Bot System", // Bot System
+          name: logDetails.author?.name || "Bot System", 
           iconURL:
             logDetails.author?.icon_url || client.user.displayAvatarURL(),
         })
-        .setTitle(logDetails.title || "Log Notification") // Log Notification
-        .setDescription(logDetails.description || "No description provided.") // Tidak ada deskripsi yang diberikan.
+        .setTitle(logDetails.title || "Log Notification") 
+        .setDescription(logDetails.description || "No description provided.") 
         .addFields(logDetails.fields || [])
-        .setFooter({ text: footerText || "Unknown" }) // Tidak Diketahui
+        .setFooter({ text: footerText || "Unknown" }) 
         .setTimestamp(logDetails.timestamp || Date.now());
       const channel = client.channels.cache.get(channelId);
-      if (!channel) throw new Error(`Channel with ID ${channelId} not found.`); // Channel dengan ID ${channelId} tidak ditemukan.
+      if (!channel) throw new Error(`Channel with ID ${channelId} not found.`); 
 
       await logChannel.send({ embeds: [embed] });
     } catch (error) {
-      console.error(`Error sending log to channel ${channelId}:`, error); // Error mengirim log ke channel ${channelId}:
+      console.error(`Error sending log to channel ${channelId}:`, error); 
     }
   },
 };

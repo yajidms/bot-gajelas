@@ -4,6 +4,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
 } = require("discord.js");
 module.exports = {
   data: new SlashCommandBuilder()
@@ -29,10 +30,10 @@ module.exports = {
       interaction.options.getMember("user") || interaction.member;
     const avatarType = interaction.options.getString("type");
 
-    // Fungsi untuk mendapatkan avatar dan memeriksa apakah GIF (pusing disini anjir)
+    // Fungsi untuk mendapatkan avatar dan memeriksa apakah GIF
     const getAvatarInfo = (user, isServer = false) => {
       const avatarHash = isServer
-        ? targetMember?.avatar // Gunakan optional chaining 
+        ? targetMember?.avatar // Gunakan optional chaining
         : user.avatar;
 
       if (!avatarHash) {
@@ -45,14 +46,14 @@ module.exports = {
         return { url: null, isAnimated: false };
       }
 
-      // Periksa format animasi (a_ ya itu tuh harus ditambah ajig)
+      // Periksa format animasi
       const isAnimated = avatarHash.startsWith("a_");
 
-      
+      // Format URL
       let avatarURL;
 
       if (isServer) {
-        
+        // Pastikan command digunakan di dalam server
         if (!interaction.guild) return { url: null, isAnimated: false };
 
         // Format URL avatar server
@@ -67,7 +68,7 @@ module.exports = {
       return { url: avatarURL, isAnimated };
     };
 
-    
+    // Dapatkan informasi avatar
     const globalAvatarInfo = getAvatarInfo(targetUser);
     const serverAvatarInfo = targetMember?.avatar
       ? getAvatarInfo(targetUser, true)
@@ -94,7 +95,7 @@ module.exports = {
       if (!serverAvatarInfo || !serverAvatarInfo.url) {
         return interaction.reply({
           content: "❌ User doesn't have a server avatar!",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
       handleAvatar("Server", serverAvatarInfo);

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 const DEVELOPER_IDS = process.env.DEV_ID
@@ -14,7 +14,7 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName("opsi")
-        .setDescription("Embed detection system status") // Status sistem deteksi embed
+        .setDescription("Embed detection system status")
         .setRequired(true)
         .addChoices({ name: "On", value: "on" }, { name: "Off", value: "off" })
     )
@@ -24,14 +24,14 @@ module.exports = {
     if (!DEVELOPER_IDS.includes(interaction.user.id)) {
       return interaction.reply({
         content:
-          "🚫 **Developer Access Required**\nThis command is for the development team only!", // 🚫 **Akses Developer Diperlukan**\nPerintah ini hanya untuk tim pengembang!
-        ephemeral: true,
+          "🚫 **Developer Access Required**\nThis command is for the development team only!",
+        flags: MessageFlags.Ephemeral,
       });
     }
 
     try {
       const opsi = interaction.options.getString("opsi");
-      const currentStatus = this.getEmbedDetectionStatus(); // Validasi status saat ini
+      const currentStatus = this.getEmbedDetectionStatus();
 
       if (
         (opsi === "on" && currentStatus) ||
@@ -40,18 +40,18 @@ module.exports = {
         return interaction.reply({
           content: `⚠️ Embed detection system is already **${
             currentStatus ? "active" : "inactive"
-          }**`, // ⚠️ Sistem deteksi embed sudah **${currentStatus ? "aktif" : "nonaktif"}**
-          ephemeral: true,
+          }**`,
+          flags: MessageFlags.Ephemeral,
         });
       } // Update status
 
       embedDetectionStatus = opsi === "on";
-      const newStatus = this.getEmbedDetectionStatus(); // Response
+      const newStatus = this.getEmbedDetectionStatus();
 
-      const statusText = newStatus ? "**ACTIVE** 🟢" : "**INACTIVE** 🔴"; // "**AKTIF** 🟢" : "**NONAKTIF** 🔴"
+      const statusText = newStatus ? "**ACTIVE** 🟢" :
       await interaction.reply({
-        content: `✅ **Embed Detection System**\nStatus: ${statusText}`, // ✅ **Sistem Deteksi Embed**\nStatus: ${statusText}
-        ephemeral: true,
+        content: `✅ **Embed Detection System**\nStatus: ${statusText}`,
+        flags: MessageFlags.Ephemeral,
       }); // Logging
 
       console.log(
@@ -62,27 +62,27 @@ module.exports = {
           name: `[SYSTEM] ${interaction.user.tag}`,
           icon_url: interaction.user.displayAvatarURL(),
         },
-        title: "EMBED DETECTION UPDATE", // "EMBED DETECTION UPDATE"
+        title: "EMBED DETECTION UPDATE",
         description: [
-          `**New Status**: ${newStatus ? "ACTIVE" : "INACTIVE"}`, // `**Status Baru**: ${newStatus ? "AKTIF" : "NONAKTIF"}`
-          `**Changed By**: <@${interaction.user.id}>`, // `**Diubah Oleh**: <@${interaction.user.id}>`
-          `**Environment**: \`${process.env.NODE_ENV || "development"}\``, // `**Environment**: \`${process.env.NODE_ENV || "development"}\``
+          `**New Status**: ${newStatus ? "ACTIVE" : "INACTIVE"}`,
+          `**Changed By**: <@${interaction.user.id}>`,
+          `**Environment**: \`${process.env.NODE_ENV || "development"}\``,
         ].join("\n"),
         color: newStatus ? "#00FF00" : "#FF0000",
         fields: [
-          { name: "Command", value: `\`/${this.data.name}\``, inline: true }, // "Perintah"
+          { name: "Command", value: `\`/${this.data.name}\``, inline: true },
           {
             name: "Time",
             value: `<t:${Math.floor(Date.now() / 1000)}:R>`,
             inline: true,
-          }, // "Waktu"
+          },
         ],
       });
     } catch (error) {
-      console.error("[SYSTEM ERROR] Failed to update embed detection:", error); // "[SYSTEM ERROR] Gagal update deteksi embed:"
+      console.error("[SYSTEM ERROR] Failed to update embed detection:", error);
       await interaction.reply({
-        content: "❌ **System Update Failed**\nAn internal error occurred!", // "❌ **Gagal Update Sistem**\nTerjadi kesalahan internal!"
-        ephemeral: true,
+        content: "❌ **System Update Failed**\nAn internal error occurred!",
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

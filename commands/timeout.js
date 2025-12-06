@@ -1,33 +1,32 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { PermissionsBitField } = require("discord.js");
+const { PermissionsBitField, MessageFlags } = require("discord.js");
 const ms = require("ms");
-const { sendLog } = require("../handlers/logHandler"); // Ensure logHandler is imported
+const { sendLog } = require("../handlers/logHandler");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("timeout")
-    .setDescription("Times out a user.") // Description in English
+    .setDescription("Times out a user.")
     .addUserOption((option) =>
       option
         .setName("user")
-        .setDescription("The user to timeout.") // Description in English
+        .setDescription("The user to timeout.")
         .setRequired(true)
     )
     .addStringOption((option) =>
       option
-        .setName("duration") // Changed "waktu" to "duration" for clarity
-        .setDescription("Timeout duration (e.g., 10m, 1h).") // Description in English
+        .setName("duration")
+        .setDescription("Timeout duration (e.g., 10m, 1h).")
         .setRequired(true)
     )
     .addStringOption((option) =>
       option
         .setName("reason")
-        .setDescription("Timeout reason.") // Description in English
+        .setDescription("Timeout reason.")
         .setRequired(false)
     ),
 
   async execute(interaction) {
-    // Check user permissions
     if (
       !interaction.member.permissions.has(
         PermissionsBitField.Flags.ModerateMembers
@@ -35,20 +34,20 @@ module.exports = {
     ) {
       return interaction.reply({
         content: "You do not have permission to use this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
     const user = interaction.options.getUser("user");
-    const duration = interaction.options.getString("duration"); // Changed "waktu" to "duration"
+    const duration = interaction.options.getString("duration");
     const reason =
-      interaction.options.getString("reason") || "No reason provided."; // Changed default reason
+      interaction.options.getString("reason") || "No reason provided.";
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member) {
       return interaction.reply({
         content: "User not found in this server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -56,18 +55,17 @@ module.exports = {
       const timeoutDuration = ms(duration);
       await member.timeout(timeoutDuration, reason);
 
-      // Send log to the log channel
       const logDetails = {
         author: {
           name: user.tag,
           icon_url: user.displayAvatarURL(),
         },
         title: "User Timed Out",
-        description: `${user.tag} has been timed out.`, // Description in English
+        description: `${user.tag} has been timed out.`,
         fields: [
-          { name: "User ID", value: user.id, inline: true }, // Field name in English
-          { name: "Timeout Duration", value: duration, inline: true }, // Field name in English
-          { name: "Reason", value: reason, inline: true }, // Field name in English
+          { name: "User ID", value: user.id, inline: true },
+          { name: "Timeout Duration", value: duration, inline: true },
+          { name: "Reason", value: reason, inline: true },
         ],
         userId: user.id,
         timestamp: Date.now(),
@@ -77,13 +75,13 @@ module.exports = {
 
       interaction.reply({
         content: `**${user.tag}** has been timed out for ${duration}. Reason: ${reason}`,
-      }); // Response in English
+      });
     } catch (error) {
-      console.error("Error during timeout:", error); // Error message in English
+      console.error("Error during timeout:", error);
       return interaction.reply({
         content: "An error occurred while trying to timeout the user.",
-        ephemeral: true,
-      }); // Error message in English
+        flags: MessageFlags.Ephemeral,
+      });
     }
   },
 };

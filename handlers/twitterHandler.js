@@ -1,14 +1,14 @@
 const axios = require("axios");
 const { AttachmentBuilder } = require("discord.js");
 
-// Fungsi untuk mendapatkan ukuran file sebelum diunggah
+// Function to get the file size before uploading
 async function getFileSize(url) {
   try {
     let response = await axios.head(url);
     return parseInt(response.headers["content-length"], 10);
   } catch (error) {
-    console.error("Gagal mendapatkan ukuran file:", error);
-    return Infinity; // Kembalikan ukuran besar jika gagal
+    console.error("Failed to get the file size:", error);
+    return Infinity;
   }
 }
 
@@ -18,10 +18,9 @@ async function handleX(msg) {
   const args = msg.content.trim().split(/ +/);
   const command = args[0].replace(/^f\./, "");
   if (command === "x") {
-    // Tambahkan pengecekan tutor di sini
     if (!args[1] || !urlPattern.test(args[1])) {
       return msg.reply(
-        "Masukkan URL Video Twitter/X yang valid!\nContoh: `f.x https://twitter.com/...`"
+        "Enter a valid Twitter/X Video URL!\nExample: `f.x https://x.com/...`"
       );
     }
 
@@ -45,16 +44,14 @@ async function handleX(msg) {
       console.log(data);
 
       try {
-        let fileSizeLimit = 100 * 1024 * 1024; // Discord membatasi unggahan file max 8MB
+        let fileSizeLimit = 100 * 1024 * 1024;
         let fileSize = await getFileSize(data.url);
 
         if (fileSize > fileSizeLimit) {
-          // Jika file terlalu besar, kirimkan URL saja
           let url = data.url;
           let modifiedUrl = url.replace("dl=1", "dl=0");
           msg.channel.send(`[${messageContent || "᲼"}](${modifiedUrl})`);
         } else {
-          // Jika file masih dalam batas aman, kirim sebagai attachment
           let attachment = new AttachmentBuilder(data.url, {
             name: "x.mp4",
           });
@@ -72,12 +69,12 @@ async function handleX(msg) {
           msg.channel.send(`[${messageContent || "_"}](${modifiedUrl})`);
         } else {
           console.error(e);
-          msg.channel.send(`Error, coba lagi!.`);
+          msg.channel.send(`Failed to download the video`);
         }
       }
     } catch (e) {
       console.error(e);
-      msg.channel.send(`Error, coba lagi!.`);
+      msg.channel.send(`Failed to download the video`);
     }
   }
 }

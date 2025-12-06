@@ -5,12 +5,11 @@ const { sendLog } = require("./logHandler");
 const fs = require("fs");
 const path = require("path");
 const pdfParse = require("pdf-parse");
-const mammoth = require("mammoth");
-const XLSX = require("xlsx");
-const pptx2json = require("pptx2json");
+const officeParser = require("officeparser");
 const Tesseract = require("tesseract.js");
 
 let aiStatus = true;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // === Gemini API Key Switcher ===
 const geminiKeys = [
@@ -31,10 +30,10 @@ function switchGeminiKey() {
 }
 
 function getGeminiModel(modelName) {
-  const genAI = new GoogleGenerativeAI(getActiveGeminiKey());
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   return genAI.getGenerativeModel({ model: modelName });
 }
-// === End Gemini API Key Switcher ===
+// === End Gemini API Key ===
 
 const togetherApiKey = process.env.TOGETHER_API_KEY;
 const llamaModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
@@ -92,38 +91,54 @@ async function readAttachment(attachment) {
       const data = fs.readFileSync(tempPath);
       const pdf = await pdfParse(data);
       text = pdf.text;
-    } else if (name.endsWith(".docx")) {
-      const data = fs.readFileSync(tempPath);
-      const result = await mammoth.extractRawText({ buffer: data });
-      text = result.value;
+    } else if (name.endsWith(".docx") || name.endsWith(".doc")) {
+      // Use officeparser for Word documents
+      try {
+        const data = await officeParser.parseOfficeAsync(tempPath);
+        text = data || "[Word document processed but no text content found]";
+      } catch (docError) {
+        console.error("Word document processing error:", docError);
+        text = `[Failed to process Word document: ${docError.message}]`;
+      }
     } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
-      const workbook = XLSX.readFile(tempPath);
-      text = workbook.SheetNames.map((sheetName) => {
-        const sheet = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName]);
-        return `Sheet: ${sheetName}\n${sheet}`;
-      }).join("\n\n");
-    } else if (name.endsWith(".pptx")) {
-      const slides = await pptx2json(tempPath);
-      text = slides
-        .map(
-          (slide, idx) =>
-            `Slide ${idx + 1}:\n${slide.texts ? slide.texts.join("\n") : ""}`
-        )
-        .join("\n\n");
-    } else if (name.endsWith(".ppt")) {
-      text = "[.ppt format not supported, use .pptx]";
+      // Use officeparser for Excel documents
+      try {
+        const data = await officeParser.parseOfficeAsync(tempPath);
+        text = data || "[Excel document processed but no text content found]";
+      } catch (excelError) {
+        console.error("Excel document processing error:", excelError);
+        text = `[Failed to process Excel document: ${excelError.message}]`;
+      }
+    } else if (name.endsWith(".pptx") || name.endsWith(".ppt")) {
+      // Use officeparser for PowerPoint documents
+      try {
+        const data = await officeParser.parseOfficeAsync(tempPath);
+        text = data || "[PowerPoint document processed but no text content found]";
+      } catch (pptError) {
+        console.error("PowerPoint document processing error:", pptError);
+        text = `[Failed to process PowerPoint document: ${pptError.message}]`;
+      }
     } else {
       text = "[Unsupported file type]";
     }
   } catch (e) {
-    text = "[Failed to read attachment]";
+    console.error("General file processing error:", e);
+    text = `[Failed to read attachment: ${e.message}]`;
   }
-  fs.unlinkSync(tempPath);
+  
+  // Clean up temp file
+  try {
+    fs.unlinkSync(tempPath);
+  } catch (cleanupError) {
+    console.warn("Failed to cleanup temp file:", cleanupError);
+  }
+  
   return text;
 }
 
 module.exports = {
   handleAiChat: async (message) => {
+    const geminiProPreviewPrefix = "f.geminipropreview";
     const geminiProPrefix = "f.geminipro";
     const geminiFlashPrefix = "f.geminiflash";
     const llamaPrefix = "f.llama";
@@ -140,30 +155,31 @@ module.exports = {
       });
     }
 
-    // Kirim tutorial jika user mengetik f.ai tanpa pertanyaan
+    // send tutorial if user asks for help
     if (message.content.trim() === "f.ai") {
       const tutorialEmbed = new EmbedBuilder()
-        .setTitle("How to Use AI Chat")
-        .setDescription(
-          "**Use the following command to ask the AI:**\n\n" +
-            "**Gemini Pro:**\n" +
-            "`f.geminipro [your question]`\n" +
-            "**Gemini Flash:**\n" +
-            "`f.geminiflash [your question]`\n" +
-            "**Llama AI:**\n" +
-            "`f.llama [your question]`\n" +
-            "**DeepSeek R1:**\n" +
-            "`f.deepseek-r1 [your question]`\n" +
-            "_You can also attach a .txt, .pdf, or .docx file to include its content in your question!_"
-        )
-        .setColor(0x5865f2);
+          .setTitle("How to Use AI Chat")
+          .setDescription(
+              "**Use the following command to ask the AI:**\n\n" +
+              "**Gemini Pro Preview:**\n" +
+              "`f.geminipropreview [your question]`\n" +
+              "**Gemini Pro:**\n" +
+              "`f.geminipro [your question]`\n" +
+              "**Gemini Flash:**\n" +
+              "`f.geminiflash [your question]`\n" +
+              "**Llama AI:**\n" +
+              "`f.llama [your question]`\n" +
+              "**DeepSeek R1:**\n" +
+              "`f.deepseek-r1 [your question]`\n" +
+              "_You can also attach files (documents and images) to include their content in your question!_"
+          )
+          .setColor(0x5865f2);
       return message.reply({
         embeds: [tutorialEmbed],
         allowedMentions: { repliedUser: false },
       });
     }
 
-    // Cek jika ada attachment
     let fileContent = "";
     if (message.attachments && message.attachments.size > 0) {
       const fileContents = [];
@@ -174,15 +190,13 @@ module.exports = {
             `--- File: ${attachment.name} ---\n${content}\n--- End of ${attachment.name} ---`
           );
         } catch (e) {
-          fileContents.push(
-            `--- File: ${attachment.name} ---\n[Failed to read attachment]\n--- End of ${attachment.name} ---`
-          );
+          fileContents.push(`--- File: ${attachment.name} ---\n[Failed to read attachment: ${e.message}]\n--- End of ${attachment.name} ---`);
         }
       }
       fileContent = fileContents.join("\n\n");
     }
 
-    // Gabungkan fileContent ke prompt jika ada
+    // Combine prompt with file content if available
     function combinePrompt(prompt) {
       if (fileContent) {
         return `${prompt}\n\n[File Content Start]\n${fileContent}\n[File Content End]`;
@@ -190,13 +204,22 @@ module.exports = {
       return prompt;
     }
 
-    if (message.content.startsWith(geminiProPrefix)) {
+    if (message.content.startsWith(geminiProPreviewPrefix)) {
+      await handleGeminiResponse(
+          message,
+          geminiProPreviewPrefix,
+          combinePrompt,
+          null,
+          "Gemini 3.0 Pro Preview",
+          "https://i.imgur.com/7FNd7DF.png"
+      );
+    } else if (message.content.startsWith(geminiProPrefix)) {
       await handleGeminiResponse(
         message,
         geminiProPrefix,
         combinePrompt,
         null,
-        "Gemini 2.5 Pro Experimental",
+        "Gemini 2.5 Pro",
         "https://i.imgur.com/7FNd7DF.png"
       );
     } else if (message.content.startsWith(geminiFlashPrefix)) {
@@ -205,7 +228,7 @@ module.exports = {
         geminiFlashPrefix,
         combinePrompt,
         null,
-        "Gemini 2.5 Flash Experimental",
+        "Gemini 2.5 Flash Preview",
         "https://i.imgur.com/7FNd7DF.png"
       );
     } else if (message.content.startsWith(llamaPrefix)) {
@@ -242,50 +265,69 @@ async function handleGeminiResponse(
   }
   const prompt = combinePrompt(userQuestion);
 
-  let lastError;
-  for (let i = 0; i < geminiKeys.length; i++) {
+  // send thinking message
+  const thinkingEmbed = new EmbedBuilder()
+    .setDescription("thinking...")
+    .setColor(0xffa500)
+    .setAuthor({
+      name: `Powered by ${modelName}`,
+      iconURL: iconUrl,
+    })
+    .setTimestamp();
+
+  const thinkingMessage = await message.reply({
+    embeds: [thinkingEmbed],
+    allowedMentions: { repliedUser: false },
+  });
+
+  try {
+    // Determine model ID based on modelName
+    let modelId;
+    if (modelName.includes("3.0") || modelName.includes("Preview")) {
+      modelId = "gemini-3-pro-preview";
+    } else if (modelName.includes("Flash")) {
+      modelId = "gemini-2.5-flash";
+    } else {
+      modelId = "gemini-2.5-pro";
+    }
+
+    const usedModel = getGeminiModel(modelId);
+    const response = await usedModel.generateContent(prompt);
+    let answer = response.response.text();
+
+    const partsSent = await sendResponseWithEdit(thinkingMessage, answer, modelName, iconUrl, message.author.username);
+
+    await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
+      userId: message.author.id,
+      messageId: message.id,
+      author: {
+        name: message.author.tag,
+        icon_url: message.author.displayAvatarURL(),
+      },
+      title: `${modelName} Request Processed`,
+      description: `**Question:** ${userQuestion}`,
+      fields: [
+        { name: "User", value: `<@${message.author.id}>`, inline: true },
+        { name: "Parts Sent", value: `${partsSent}`, inline: true },
+      ],
+    });
+  } catch (error) {
+    // Edit thinking message to error
     try {
-      const usedModel = getGeminiModel(
-        modelName.includes("Flash")
-          ? "gemini-2.5-flash-preview-04-17"
-          : "gemini-2.5-pro-exp-03-25"
-      );
-      const response = await usedModel.generateContent(prompt);
-      let answer = response.response.text();
-      const partsSent = await sendResponse(message, answer, modelName, iconUrl);
-      // Logging success
-      await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
-        userId: message.author.id,
-        messageId: message.id,
-        author: {
-          name: message.author.tag,
-          icon_url: message.author.displayAvatarURL(),
-        },
-        title: `${modelName} Request Processed`,
-        description: `**Question:** ${userQuestion}`,
-        fields: [
-          { name: "User", value: `<@${message.author.id}>`, inline: true },
-          { name: "Parts Sent", value: `${partsSent}`, inline: true },
-        ],
+      await thinkingMessage.edit({
+        embeds: [new EmbedBuilder()
+          .setTitle("Processing Error")
+          .setDescription(`Failed to generate ${modelName} response`)
+          .addFields(
+            { name: "Error", value: error.message.substring(0, 1024) },
+            { name: "User", value: message.author.toString() }
+          )
+          .setColor(0xff0000)],
       });
-      return;
-    } catch (error) {
-      lastError = error;
-      // Deteksi error limit/quota
-      if (
-        error.message &&
-        (error.message.toLowerCase().includes("quota") ||
-          error.message.toLowerCase().includes("limit") ||
-          error.message.toLowerCase().includes("exceeded"))
-      ) {
-        switchGeminiKey();
-        continue;
-      } else {
-        break;
-      }
+    } catch (editError) {
+      await handleError(message, modelName, error, userQuestion);
     }
   }
-  await handleError(message, modelName, lastError, userQuestion);
 }
 
 async function handleLlamaResponse(message, prefix, combinePrompt = (x) => x) {
@@ -326,7 +368,6 @@ async function handleLlamaResponse(message, prefix, combinePrompt = (x) => x) {
       "https://i.imgur.com/i0vcc7G.jpeg"
     );
 
-    // Logging success
     await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
       userId: message.author.id,
       messageId: message.id,
@@ -392,7 +433,6 @@ async function handleDeepSeekResponse(
       "https://i.imgur.com/yIilZ11.png"
     );
 
-    // Logging success
     await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
       userId: message.author.id,
       messageId: message.id,
@@ -461,6 +501,58 @@ async function sendResponse(message, answer, modelName, iconUrl) {
   return filteredParts.length;
 }
 
+// New function to edit thinking messages into responses
+async function sendResponseWithEdit(thinkingMessage, answer, modelName, iconUrl, username) {
+  if (!answer) throw new Error("AI returned empty response");
+
+  const answerParts = [];
+  while (answer.length > 0) {
+    answerParts.push(answer.substring(0, 4096));
+    answer = answer.substring(4096);
+  }
+
+  const filteredParts = answerParts.filter((part) => part.trim().length > 0);
+  if (filteredParts.length === 0) throw new Error("No valid content generated");
+
+  const baseEmbed = {
+    author: {
+      name: `Powered by ${modelName}`,
+      iconURL: iconUrl,
+    },
+    footer: {
+      text: `AI-generated content may be inaccurate`,
+    },
+    timestamp: Date.now(),
+  };
+
+  // Edit the thinking message with the first response
+  const firstEmbed = new EmbedBuilder(baseEmbed)
+    .setTitle(`Answer for ${username}`)
+    .setDescription(filteredParts[0]);
+
+  await thinkingMessage.edit({
+    embeds: [firstEmbed],
+  });
+
+  let lastMessage = thinkingMessage;
+
+  // send continued parts as replies
+  for (let i = 1; i < filteredParts.length; i++) {
+    const continueEmbed = new EmbedBuilder(baseEmbed)
+      .setTitle(`Continued Answer [Part ${i + 1}]`)
+      .setDescription(filteredParts[i]);
+
+    lastMessage = await lastMessage.reply({
+      embeds: [continueEmbed],
+      allowedMentions: { repliedUser: false },
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  return filteredParts.length;
+}
+
 async function handleError(message, modelName, error, userQuestion = "") {
   console.error(`${modelName} Processing Error:`, error);
 
@@ -478,7 +570,6 @@ async function handleError(message, modelName, error, userQuestion = "") {
     allowedMentions: { repliedUser: false },
   });
 
-  // Logging error
   await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
     userId: message.author.id,
     messageId: message.id,

@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   ChannelType,
   EmbedBuilder,
+  MessageFlags,
 } = require("discord.js");
 const {
   activeAIChats,
@@ -15,9 +16,7 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("aichat")
-    .setDescription(
-      "Start a chat session with Gemini 2.5 Flash AI in this forum thread."
-    )
+    .setDescription("Start a chat session with Gemini AI in this forum thread.")
     .addStringOption((option) =>
       option
         .setName("initial_prompt")
@@ -48,7 +47,7 @@ async function handleAIChatBegin(interaction) {
   ) {
     await interaction.reply({
       content: "This command can only be used inside a forum post (thread).",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -57,22 +56,21 @@ async function handleAIChatBegin(interaction) {
   if (activeAIChats.has(channel.id)) {
     await interaction.reply({
       content: "There is already an active AI chat session in this thread.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
 
   try {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     let fileContent = "";
     let fileReadingMessage = "";
 
-    // Read attachment if present
     if (attachment) {
       await interaction.editReply({
         content: `Reading file \`${attachment.name}\`...`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       try {
         fileContent = await readAttachment(attachment);
@@ -83,27 +81,23 @@ async function handleAIChatBegin(interaction) {
       }
     }
 
-    // Combine prompt & file content
     let fullInitialPrompt = initialPrompt;
     if (fileContent) {
       fullInitialPrompt += `\n\n--- File Content: ${attachment.name} ---\n${fileContent}\n--- End of File ---`;
     }
 
-    // Start chat session with Gemini 2.5 Flash
     const model = getGeminiModel();
     const chatSession = model.startChat({
       generationConfig: {},
       safetySettings,
     });
 
-    // Save state
     activeAIChats.set(channel.id, {
       chatSession,
       userId: user.id,
       modelName: modelDisplayName,
     });
 
-    // Send welcome message
     const welcomeEmbed = new EmbedBuilder()
       .setColor("#4285F4")
       .setTitle(`🤖 Gemini Chat Session Started`)
@@ -135,7 +129,7 @@ async function handleAIChatBegin(interaction) {
       }
     }
 
-    // Send welcome & initial response
+    // Send welcome
     await channel.send({ embeds: [welcomeEmbed] });
     if (initialResponseText) {
       const chunks = splitMessage(initialResponseText);
@@ -145,17 +139,16 @@ async function handleAIChatBegin(interaction) {
       }
     }
 
-    // Notify user
     await interaction.editReply({
       content: `Gemini chat session is ready in this thread.${fileReadingMessage}`,
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   } catch (error) {
     const errorMsg = `Fatal error starting ${modelDisplayName} session.`;
     try {
       if (interaction.replied || interaction.deferred)
-        await interaction.followUp({ content: errorMsg, ephemeral: true });
-      else await interaction.reply({ content: errorMsg, ephemeral: true });
+        await interaction.followUp({ content: errorMsg, flags: MessageFlags.Ephemeral });
+      else await interaction.reply({ content: errorMsg, flags: MessageFlags.Ephemeral });
     } catch {}
     if (activeAIChats.has(channel.id)) activeAIChats.delete(channel.id);
   }

@@ -1,17 +1,17 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("unban")
-    .setDescription("Unbans a specific user.") // Deskripsi dalam bahasa Inggris
+    .setDescription("Unbans a specific user.")
     .addStringOption((option) =>
       option
         .setName("user_id")
-        .setDescription("The user ID to unban.") // Deskripsi dalam bahasa Inggris
+        .setDescription("The user ID to unban.")
         .setRequired(true)
     )
-    .setDefaultPermission(true), // Tampilkan command untuk semua pengguna
+    .setDefaultPermission(true),
 
   async execute(interaction) {
     if (
@@ -19,8 +19,8 @@ module.exports = {
     ) {
       return interaction.reply({
         content: "You do not have permission to use this command.",
-        ephemeral: true,
-      }); // Pesan dalam bahasa Inggris
+        flags: MessageFlags.Ephemeral,
+      });
     }
 
     const userId = interaction.options.getString("user_id");
@@ -31,25 +31,25 @@ module.exports = {
 
       if (!isBanned) {
         return interaction.reply({
-          content: `User with ID **${userId}** was not found in the ban list.`, // Pesan dalam bahasa Inggris
-          ephemeral: true,
+          content: `User with ID **${userId}** was not found in the ban list.`,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
       await interaction.guild.members.unban(userId);
       await interaction.reply({
         content: `User with ID **${userId}** has been successfully unbanned.`,
-      }); // Pesan dalam bahasa Inggris
+      });
 
       const logDetails = {
         author: {
           name: interaction.user.tag,
           icon_url: interaction.user.displayAvatarURL(),
         },
-        title: "User Unbanned", // Judul log dalam bahasa Inggris
-        description: `User with ID **${userId}** has been unbanned.`, // Deskripsi log dalam bahasa Inggris
+        title: "User Unbanned",
+        description: `User with ID **${userId}** has been unbanned.`,
         fields: [
-          { name: "User ID", value: userId, inline: true }, // Nama field dalam bahasa Inggris
+          { name: "User ID", value: userId, inline: true },
           {
             name: "Admin yang Melakukan",
             value: `<@${interaction.user.id}>`,
@@ -63,8 +63,8 @@ module.exports = {
     } catch (error) {
       console.error("Error saat membuka ban:", error);
       await interaction.reply({
-        content: `An error occurred while trying to unban. Make sure the user ID is valid and the user is actually banned.`, // Pesan dalam bahasa Inggris
-        ephemeral: true,
+        content: `An error occurred while trying to unban. Make sure the user ID is valid and the user is actually banned.`,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

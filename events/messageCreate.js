@@ -3,7 +3,6 @@ const {
   activeAIChats,
   readAttachment: readAttachmentState,
   splitMessage: splitMessageState,
-  switchGeminiKey,
   getGeminiModel,
 } = require("../handlers/aiChatState");
 const { handleAiChat: handlePrefixAiChat } = require("../handlers/aiHandler");
@@ -21,10 +20,9 @@ module.exports = {
     if (activeAIChats.has(message.channel.id)) {
       const chatData = activeAIChats.get(message.channel.id);
 
-      // Only process messages from the user who started this session
       if (message.author.id !== chatData.userId) return;
 
-      // === Active /aichat Session Handling Logic ===
+      // Active /aichat Session Handling Logic
       const { chatSession, modelName } = chatData;
       let userMessageContent = message.content || "";
       let fileInfoText = "";

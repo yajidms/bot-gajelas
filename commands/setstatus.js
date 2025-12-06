@@ -1,18 +1,21 @@
-const { SlashCommandBuilder, ActivityType } = require("discord.js");
+const { SlashCommandBuilder, ActivityType, MessageFlags } = require("discord.js");
 const { sendLog } = require("../handlers/logHandler");
 
 const DEVELOPER_IDS = process.env.DEV_ID
   ? process.env.DEV_ID.split(",").map((id) => id.trim())
   : [];
+const activeTimeouts = new Map();
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("set")
-    .setDescription("Manage bot settings")
+    .setDescription("[Developer Only] Manage bot settings")
     .addSubcommand((subcommand) =>
       subcommand
         .setName("status")
-        .setDescription("Set temporary or permanent bot status")
+        .setDescription(
+          "[Developer Only] Set temporary or permanent bot status"
+        )
         .addStringOption((option) =>
           option
             .setName("type")
@@ -48,7 +51,9 @@ module.exports = {
     .addSubcommand((subcommand) =>
       subcommand
         .setName("activity")
-        .setDescription("Set temporary or permanent bot activity")
+        .setDescription(
+          "[Developer Only] Set temporary or permanent bot activity"
+        )
         .addStringOption((option) =>
           option
             .setName("type")
@@ -89,7 +94,7 @@ module.exports = {
       return interaction.reply({
         content:
           "🚫 **System Restricted**\nThis command requires developer privileges",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -119,19 +124,27 @@ module.exports = {
         });
 
         if (timeoutDuration) {
-          setTimeout(async () => {
+          // Clear any existing timeout for this user
+          if (activeTimeouts.has(interaction.user.id)) {
+            clearTimeout(activeTimeouts.get(interaction.user.id));
+          }
+          
+          const timeoutId = setTimeout(async () => {
             await interaction.client.user.setPresence({
               status: "online",
               activities: [],
             });
+            activeTimeouts.delete(interaction.user.id);
           }, timeoutDuration);
+          
+          activeTimeouts.set(interaction.user.id, timeoutId);
         }
 
         await interaction.reply({
           content: `✅ Bot status successfully set to **${type}** with custom status: **"${message}"** for **${getReadableDuration(
             duration
           )}**`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
@@ -173,19 +186,27 @@ module.exports = {
         });
 
         if (timeoutDuration) {
-          setTimeout(async () => {
+          // Clear any existing timeout for this user
+          if (activeTimeouts.has(interaction.user.id)) {
+            clearTimeout(activeTimeouts.get(interaction.user.id));
+          }
+          
+          const timeoutId = setTimeout(async () => {
             await interaction.client.user.setPresence({
               status: "online",
               activities: [],
             });
+            activeTimeouts.delete(interaction.user.id);
           }, timeoutDuration);
+          
+          activeTimeouts.set(interaction.user.id, timeoutId);
         }
 
         await interaction.reply({
           content: `✅ Bot activity successfully set to **${activity.toLowerCase()}** for **${getReadableDuration(
             duration
           )}** with message **"${message}"**`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
 
         await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
@@ -213,26 +234,44 @@ module.exports = {
       }
     } catch (error) {
       console.error("[SYSTEM ERROR] Failed to update presence:", error);
-      await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
-        author: {
-          name: `[SYSTEM] ERROR`,
-          icon_url: interaction.client.user.displayAvatarURL(),
-        },
-        title: "BOT PRESENCE UPDATE FAILED",
-        description: `**Error Details:**\n\`\`\`${error.message}\`\`\``,
-        color: "#FF0000",
-        fields: [
-          { name: "Developer", value: `<@${interaction.user.id}>` },
-          {
-            name: "Timestamp",
-            value: `<t:${Math.floor(Date.now() / 1000)}:R>`,
+      
+      // Try to send error log (but don't let it crash the error handler)
+      try {
+        await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
+          author: {
+            name: `[SYSTEM] ERROR`,
+            icon_url: interaction.client.user.displayAvatarURL(),
           },
-        ],
-      });
-      await interaction.reply({
-        content: "❌ **System Update Failed**\nCheck console for details",
-        ephemeral: true,
-      });
+          title: "BOT PRESENCE UPDATE FAILED",
+          description: `**Error Details:**\n\`\`\`${error.message}\`\`\``,
+          color: "#FF0000",
+          fields: [
+            { name: "Developer", value: `<@${interaction.user.id}>` },
+            {
+              name: "Timestamp",
+              value: `<t:${Math.floor(Date.now() / 1000)}:R>`,
+            },
+          ],
+        });
+      } catch (logError) {
+        console.error("[SYSTEM ERROR] Failed to send error log:", logError);
+      }
+
+      // Handle interaction reply safely
+      try {
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({
+            content: "❌ **System Update Failed**\nCheck console for details",
+            flags: MessageFlags.Ephemeral,
+          });
+        } else {
+          await interaction.editReply({
+            content: "❌ **System Update Failed**\nCheck console for details",
+          });
+        }
+      } catch (replyError) {
+        console.error("[SYSTEM ERROR] Failed to send error reply:", replyError);
+      }
     }
   },
 };

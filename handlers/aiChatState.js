@@ -7,51 +7,25 @@ const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
 const pdfParse = require("pdf-parse");
-const mammoth = require("mammoth");
-const XLSX = require("xlsx");
-const pptx2json = require("pptx2json");
 const Tesseract = require("tesseract.js");
+const officeParser = require("officeparser");
 require("dotenv").config();
 
-const geminiKeys = [
-  process.env.GEMINI_API_KEY_1,
-  process.env.GEMINI_API_KEY_2,
-  process.env.GEMINI_API_KEY_3,
-  process.env.GEMINI_API_KEY_4,
-].filter(Boolean);
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-let currentGeminiKeyIndex = 0;
-
-function getActiveGeminiKey() {
-  if (geminiKeys.length === 0) {
-    throw new Error("No valid GEMINI_API_KEY found in the .env file");
-  }
-  return geminiKeys[currentGeminiKeyIndex];
+if (!GEMINI_API_KEY) {
+  throw new Error("No valid GEMINI_API_KEY found in the .env file");
 }
 
-function switchGeminiKey() {
-  if (geminiKeys.length > 1) {
-    currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % geminiKeys.length;
-    console.log(
-      `[AI Key] Switching to Gemini Key Index: ${currentGeminiKeyIndex}`
-    );
-  } else {
-    console.log("[AI Key] Only 1 Gemini API key available, cannot switch.");
-  }
-}
-
-const GEMINI_MODEL_NAME = "Gemini 2.5 Flash";
-const GEMINI_INTERNAL_ID = "gemini-2.5-flash-preview-04-17";
+const GEMINI_MODEL_NAME = "Gemini 2.5 Pro";
+const GEMINI_INTERNAL_ID = "gemini-2.5-pro";
 
 /**
- * @param {string} modelTypeIndicator
  * @returns {GenerativeModel}
  */
 function getGeminiModel() {
-  const targetModelId = GEMINI_INTERNAL_ID;
-  const key = getActiveGeminiKey();
-  const genAI = new GoogleGenerativeAI(key);
-  return genAI.getGenerativeModel({ model: targetModelId });
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  return genAI.getGenerativeModel({ model: GEMINI_INTERNAL_ID });
 }
 
 const safetySettings = [
@@ -98,8 +72,18 @@ async function readAttachment(attachment) {
     console.log(
       `[File Read] Download successful: ${name} (${response.data.length} bytes)`
     );
-    const codeExtensions = [ ".txt", ".js", ".ts", ".jsx", ".tsx", ".py", ".java", ".c", ".cpp", ".cs", ".rb", ".go", ".php", ".swift", ".kt", ".kts", ".rs", ".scala", ".sh", ".bat", ".pl", ".lua", ".r", ".m", ".vb", ".dart", ".html", ".css", ".scss", ".less", ".json", ".xml", ".yml", ".yaml", ".md", ".ini", ".cfg", ".toml", ".sql", ".asm", ".s", ".h", ".hpp", ".vue", ".coffee", ".erl", ".ex", ".exs", ".fs", ".fsx", ".groovy", ".jl", ".lisp", ".clj", ".cljs", ".ml", ".mli", ".nim", ".ps1", ".psm1", ".psd1", ".rkt", ".vb", ".vbs", ".v", ".sv", ".svelte", ".jar" ];
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
+    const codeExtensions = [ 
+      ".txt", ".js", ".ts", ".jsx", ".tsx", ".py", ".java", ".c", ".cpp", ".cs",
+      ".rb", ".go", ".php", ".swift", ".kt", ".kts", ".rs", ".scala", ".sh",
+      ".bat", ".pl", ".lua", ".r", ".m", ".vb", ".dart", ".html", ".css", ".scss",
+      ".less", ".json", ".xml", ".yml", ".yaml", ".md", ".ini", ".cfg", ".toml",
+      ".sql", ".asm", ".s", ".h", ".hpp", ".vue", ".coffee", ".erl", ".ex", ".exs",
+      ".fs", ".fsx", ".groovy", ".jl", ".lisp", ".clj", ".cljs", ".ml", ".mli",
+      ".nim", ".ps1", ".psm1", ".psd1", ".rkt", ".vb", ".vbs", ".v", ".sv", ".svelte", ".jar" 
+    ];
+    const imageExtensions = [
+    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"
+    ];
     const documentExtensions = [".pdf", ".docx", ".xlsx", ".xls", ".pptx"];
 
     let text = `[File Name: ${name}]\n`;
@@ -137,35 +121,17 @@ async function readAttachment(attachment) {
         text += "[Failed to read PDF]";
         console.error(`[File Read] PDF Error ${name}:`, e);
       }
-    } else if (name.endsWith(".docx")) {
+    } else if (name.endsWith(".docx") || name.endsWith(".doc") || 
+               name.endsWith(".xlsx") || name.endsWith(".xls") || 
+               name.endsWith(".pptx") || name.endsWith(".ppt")) {
+      // Unified Office document processing using officeparser
       try {
-        text += (await mammoth.extractRawText({ path: tempPath })).value;
-        console.log(`[File Read] ${name} read as DOCX.`);
-      } catch (e) {
-        text += "[Failed to read DOCX]";
-        console.error(`[File Read] DOCX Error ${name}:`, e);
-      }
-    } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
-      try {
-        const wb = XLSX.readFile(tempPath);
-        text += wb.SheetNames.map(
-          (sn) => `Sheet: ${sn}\n${XLSX.utils.sheet_to_csv(wb.Sheets[sn])}`
-        ).join("\n\n");
-        console.log(`[File Read] ${name} read as Excel.`);
-      } catch (e) {
-        text += "[Failed to read Excel]";
-        console.error(`[File Read] Excel Error ${name}:`, e);
-      }
-    } else if (name.endsWith(".pptx")) {
-      try {
-        const s = await pptx2json(tempPath);
-        text += s
-          .map((sl, i) => `Slide ${i + 1}:\n${sl.texts?.join("\n") ?? ""}`)
-          .join("\n\n");
-        console.log(`[File Read] ${name} read as PPTX.`);
-      } catch (e) {
-        text += "[Failed to read PPTX]";
-        console.error(`[File Read] PPTX Error ${name}:`, e);
+        const data = await officeParser.parseOfficeAsync(tempPath);
+        text += data || "[Office document processed but no text content found]";
+        console.log(`[File Read] ${name} read as Office document.`);
+      } catch (officeError) {
+        console.error(`[File Read] Office document processing error ${name}:`, officeError);
+        text += `[Failed to process Office document: ${officeError.message}]`;
       }
     } else {
       text += "[Unsupported file type]";
@@ -230,7 +196,6 @@ function splitMessage(text, maxLength = 1990) {
 module.exports = {
   activeAIChats,
   getGeminiModel,
-  switchGeminiKey,
   safetySettings,
   readAttachment,
   splitMessage,

@@ -1,10 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js'); // Tambahkan EmbedBuilder
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 
 const DEVELOPER_IDS = process.env.DEV_ID 
   ? process.env.DEV_ID.split(',').map(id => id.trim())
   : [];
 
-// Tambahkan fungsi sendLog
 const sendLog = async (client, channelId, embedData) => {
   try {
     const channel = await client.channels.fetch(channelId);
@@ -32,20 +31,19 @@ module.exports = {
     if (!DEVELOPER_IDS.includes(interaction.user.id)) {
       return interaction.reply({
         content: '🚫 **System Restricted**\nThis command requires elevated privileges',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 
     try {
       await interaction.reply({
         content: '🔄 **System Rebooting**\nBot akan restart dalam 3 detik...',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
 
       console.log(`[SYSTEM] Initiated restart by: ${interaction.user.tag}`);
       console.log('=== SHUTTING DOWN ===');
 
-      // Pindahkan sendLog SEBELUM setTimeout
       await sendLog(interaction.client, process.env.DEV_LOG_CHANNEL_ID, {
         author: {
           name: `[SYSTEM] ${interaction.user.tag}`,
@@ -71,7 +69,7 @@ module.exports = {
       console.error('[SYSTEM ERROR] Restart failure:', error);
       await interaction.editReply({
         content: '❌ **Reboot Failed**\nCheck system logs!',
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
   },
