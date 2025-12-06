@@ -16,7 +16,7 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("aichat")
-    .setDescription("Start a chat session with Gemini 2.5 Flash AI in this forum thread.")
+    .setDescription("Start a chat session with Gemini AI in this forum thread.")
     .addStringOption((option) =>
       option
         .setName("initial_prompt")

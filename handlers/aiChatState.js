@@ -11,40 +11,21 @@ const Tesseract = require("tesseract.js");
 const officeParser = require("officeparser");
 require("dotenv").config();
 
-const geminiKeys = [process.env.GEMINI_API_KEY];
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-let currentGeminiKeyIndex = 0;
-
-function getActiveGeminiKey() {
-  if (geminiKeys.length === 0) {
-    throw new Error("No valid GEMINI_API_KEY found in the .env file");
-  }
-  return geminiKeys[currentGeminiKeyIndex];
+if (!GEMINI_API_KEY) {
+  throw new Error("No valid GEMINI_API_KEY found in the .env file");
 }
 
-function switchGeminiKey() {
-  if (geminiKeys.length > 1) {
-    currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % geminiKeys.length;
-    console.log(
-      `[AI Key] Switching to Gemini Key Index: ${currentGeminiKeyIndex}`
-    );
-  } else {
-    console.log("[AI Key] Only 1 Gemini API key available, cannot switch.");
-  }
-}
-
-const GEMINI_MODEL_NAME = "Gemini 2.5 Flash";
-const GEMINI_INTERNAL_ID = "gemini-2.5-flash";
+const GEMINI_MODEL_NAME = "Gemini 2.5 Pro";
+const GEMINI_INTERNAL_ID = "gemini-2.5-pro";
 
 /**
- * @param {string} modelTypeIndicator
  * @returns {GenerativeModel}
  */
 function getGeminiModel() {
-  const targetModelId = GEMINI_INTERNAL_ID;
-  const key = getActiveGeminiKey();
-  const genAI = new GoogleGenerativeAI(key);
-  return genAI.getGenerativeModel({ model: targetModelId });
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  return genAI.getGenerativeModel({ model: GEMINI_INTERNAL_ID });
 }
 
 const safetySettings = [
@@ -215,7 +196,6 @@ function splitMessage(text, maxLength = 1990) {
 module.exports = {
   activeAIChats,
   getGeminiModel,
-  switchGeminiKey,
   safetySettings,
   readAttachment,
   splitMessage,

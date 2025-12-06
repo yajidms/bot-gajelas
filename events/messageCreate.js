@@ -3,7 +3,6 @@ const {
   activeAIChats,
   readAttachment: readAttachmentState,
   splitMessage: splitMessageState,
-  switchGeminiKey,
   getGeminiModel,
 } = require("../handlers/aiChatState");
 const { handleAiChat: handlePrefixAiChat } = require("../handlers/aiHandler");

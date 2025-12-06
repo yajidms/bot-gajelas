@@ -9,23 +9,13 @@ const officeParser = require("officeparser");
 const Tesseract = require("tesseract.js");
 
 let aiStatus = true;
-const geminiKeys = [process.env.GEMINI_API_KEY];
-
-let currentGeminiKeyIndex = 0;
-
-function getActiveGeminiKey() {
-  return geminiKeys[currentGeminiKeyIndex];
-}
-
-function switchGeminiKey() {
-  currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % geminiKeys.length;
-}
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 function getGeminiModel(modelName) {
-  const genAI = new GoogleGenerativeAI(getActiveGeminiKey());
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   return genAI.getGenerativeModel({ model: modelName });
 }
-// === End Gemini API Key Switcher ===
+// === End Gemini API Key ===
 
 const togetherApiKey = process.env.TOGETHER_API_KEY;
 const llamaModel = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
@@ -130,6 +120,7 @@ async function readAttachment(attachment) {
 
 module.exports = {
   handleAiChat: async (message) => {
+    const geminiProPreviewPrefix = "f.geminipropreview";
     const geminiProPrefix = "f.geminipro";
     const geminiFlashPrefix = "f.geminiflash";
     const llamaPrefix = "f.llama";
@@ -149,20 +140,22 @@ module.exports = {
     // send tutorial if user asks for help
     if (message.content.trim() === "f.ai") {
       const tutorialEmbed = new EmbedBuilder()
-        .setTitle("How to Use AI Chat")
-        .setDescription(
-          "**Use the following command to ask the AI:**\n\n" +
-            "**Gemini Pro:**\n" +
-            "`f.geminipro [your question]`\n" +
-            "**Gemini Flash:**\n" +
-            "`f.geminiflash [your question]`\n" +
-            "**Llama AI:**\n" +
-            "`f.llama [your question]`\n" +
-            "**DeepSeek R1:**\n" +
-            "`f.deepseek-r1 [your question]`\n" +
-            "_You can also attach files (documents and images) to include their content in your question!_"
-        )
-        .setColor(0x5865f2);
+          .setTitle("How to Use AI Chat")
+          .setDescription(
+              "**Use the following command to ask the AI:**\n\n" +
+              "**Gemini Pro Preview:**\n" +
+              "`f.geminipropreview [your question]`\n" +
+              "**Gemini Pro:**\n" +
+              "`f.geminipro [your question]`\n" +
+              "**Gemini Flash:**\n" +
+              "`f.geminiflash [your question]`\n" +
+              "**Llama AI:**\n" +
+              "`f.llama [your question]`\n" +
+              "**DeepSeek R1:**\n" +
+              "`f.deepseek-r1 [your question]`\n" +
+              "_You can also attach files (documents and images) to include their content in your question!_"
+          )
+          .setColor(0x5865f2);
       return message.reply({
         embeds: [tutorialEmbed],
         allowedMentions: { repliedUser: false },
@@ -193,7 +186,16 @@ module.exports = {
       return prompt;
     }
 
-    if (message.content.startsWith(geminiProPrefix)) {
+    if (message.content.startsWith(geminiProPreviewPrefix)) {
+      await handleGeminiResponse(
+          message,
+          geminiProPreviewPrefix,
+          combinePrompt,
+          null,
+          "Gemini 3.0 Pro Preview",
+          "https://i.imgur.com/7FNd7DF.png"
+      );
+    } else if (message.content.startsWith(geminiProPrefix)) {
       await handleGeminiResponse(
         message,
         geminiProPrefix,
@@ -260,66 +262,53 @@ async function handleGeminiResponse(
     allowedMentions: { repliedUser: false },
   });
 
-  let lastError;
-  for (let i = 0; i < geminiKeys.length; i++) {
-    try {
-      const usedModel = getGeminiModel(
-        modelName.includes("Flash")
-          ? "gemini-2.5-flash"
-          : "gemini-2.5-pro"
-      );
-      const response = await usedModel.generateContent(prompt);
-      let answer = response.response.text();
-      
-      const partsSent = await sendResponseWithEdit(thinkingMessage, answer, modelName, iconUrl, message.author.username);
-      
-
-      await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
-        userId: message.author.id,
-        messageId: message.id,
-        author: {
-          name: message.author.tag,
-          icon_url: message.author.displayAvatarURL(),
-        },
-        title: `${modelName} Request Processed`,
-        description: `**Question:** ${userQuestion}`,
-        fields: [
-          { name: "User", value: `<@${message.author.id}>`, inline: true },
-          { name: "Parts Sent", value: `${partsSent}`, inline: true },
-        ],
-      });
-      return;
-    } catch (error) {
-      lastError = error;
-      // Deteksi error limit/quota
-      if (
-        error.message &&
-        (error.message.toLowerCase().includes("quota") ||
-          error.message.toLowerCase().includes("limit") ||
-          error.message.toLowerCase().includes("exceeded"))
-      ) {
-        switchGeminiKey();
-        continue;
-      } else {
-        break;
-      }
-    }
-  }
-  
-  // If all API keys fail, edit the thinking message to error
   try {
-    await thinkingMessage.edit({
-      embeds: [new EmbedBuilder()
-        .setTitle("Processing Error")
-        .setDescription(`Failed to generate ${modelName} response`)
-        .addFields(
-          { name: "Error", value: lastError.message.substring(0, 1024) },
-          { name: "User", value: message.author.toString() }
-        )
-        .setColor(0xff0000)],
+    // Determine model ID based on modelName
+    let modelId;
+    if (modelName.includes("3.0") || modelName.includes("Preview")) {
+      modelId = "gemini-3-pro-preview";
+    } else if (modelName.includes("Flash")) {
+      modelId = "gemini-2.5-flash";
+    } else {
+      modelId = "gemini-2.5-pro";
+    }
+
+    const usedModel = getGeminiModel(modelId);
+    const response = await usedModel.generateContent(prompt);
+    let answer = response.response.text();
+
+    const partsSent = await sendResponseWithEdit(thinkingMessage, answer, modelName, iconUrl, message.author.username);
+
+    await sendLog(message.client, process.env.LOG_CHANNEL_ID, {
+      userId: message.author.id,
+      messageId: message.id,
+      author: {
+        name: message.author.tag,
+        icon_url: message.author.displayAvatarURL(),
+      },
+      title: `${modelName} Request Processed`,
+      description: `**Question:** ${userQuestion}`,
+      fields: [
+        { name: "User", value: `<@${message.author.id}>`, inline: true },
+        { name: "Parts Sent", value: `${partsSent}`, inline: true },
+      ],
     });
-  } catch (editError) {
-    await handleError(message, modelName, lastError, userQuestion);
+  } catch (error) {
+    // Edit thinking message to error
+    try {
+      await thinkingMessage.edit({
+        embeds: [new EmbedBuilder()
+          .setTitle("Processing Error")
+          .setDescription(`Failed to generate ${modelName} response`)
+          .addFields(
+            { name: "Error", value: error.message.substring(0, 1024) },
+            { name: "User", value: message.author.toString() }
+          )
+          .setColor(0xff0000)],
+      });
+    } catch (editError) {
+      await handleError(message, modelName, error, userQuestion);
+    }
   }
 }
 
