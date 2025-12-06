@@ -11,24 +11,6 @@ const Tesseract = require("tesseract.js");
 let aiStatus = true;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// === Gemini API Key Switcher ===
-const geminiKeys = [
-  process.env.GEMINI_API_KEY_1,
-  process.env.GEMINI_API_KEY_2,
-  process.env.GEMINI_API_KEY_3,
-  process.env.GEMINI_API_KEY_4,
-].filter(Boolean);
-
-let currentGeminiKeyIndex = 0;
-
-function getActiveGeminiKey() {
-  return geminiKeys[currentGeminiKeyIndex];
-}
-
-function switchGeminiKey() {
-  currentGeminiKeyIndex = (currentGeminiKeyIndex + 1) % geminiKeys.length;
-}
-
 function getGeminiModel(modelName) {
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   return genAI.getGenerativeModel({ model: modelName });
