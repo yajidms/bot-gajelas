@@ -38,7 +38,7 @@ module.exports = {
     };
 
     const embed = new EmbedBuilder()
-        .setTitle('📊 Server Stats (Droplet)')
+        .setTitle('📊 Server Stats')
         .setColor('#0099ff')
         .addFields(
             { name: '🖥️ CPU Model', value: cpuModel, inline: false },
