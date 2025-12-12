@@ -62,9 +62,9 @@ GUILD_ID=
 Once the configuration is complete, run the bot with the command:
 
 ```bash
-npm start
+bun start
 # or
-node index.js
+bun index.js
 ```
 
 ## ✨ Main Features & Commands
